@@ -9,6 +9,7 @@ namespace AlphaCoreExtractor.Helpers
 {
     public static class Globals
     {
+        public static bool LoadAsync = false;
         public static bool Verbose = false;
 
         private static string _cacheDBCPath = string.Empty;

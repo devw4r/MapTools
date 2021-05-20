@@ -47,17 +47,29 @@ namespace AlphaCoreExtractor
                 Environment.Exit(0);
             }
 
-            //Begin loading all wdt information.
-            foreach (var wdt in WDTFiles)
-            {
-                AsyncMapLoader loadMapTask = new AsyncMapLoader(wdt);
-                loadMapTask.OnMapLoaded += OnMapLoaded;
-                loadMapTask.RunWorkerAsync();
+            // For test only, extract only Azeroth.
+            // TODO: We need to process, build map files, and release memory ASAP.
+            // Right now, loading all data we are parsing would result in around 10gb.
 
-                // For test only, extract only Azeroth.
-                // TODO: We need to process, build map files, and release memory ASAP.
-                // Right now, loading all data we are parsing would result in around 10gb.
-                break;
+            //Begin loading all wdt information.
+            if (!Globals.LoadAsync)
+            {
+                foreach (var wdt in WDTFiles)
+                {
+                    var map = new CMapObj(wdt, null);
+                    LoadedMaps.Add(map);
+                    break;
+                }
+            }
+            else
+            {
+                foreach (var wdt in WDTFiles)
+                {
+                    AsyncMapLoader loadMapTask = new AsyncMapLoader(wdt);
+                    loadMapTask.OnMapLoaded += OnMapLoaded;
+                    loadMapTask.RunWorkerAsync();
+                    break;
+                }
             }
 
             Console.ReadLine();
