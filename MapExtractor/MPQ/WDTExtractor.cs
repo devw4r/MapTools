@@ -45,7 +45,7 @@ namespace AlphaCoreExtractor.MPQ
                             if (file.Contains("wdt"))
                             {
                                 if (ExtractWDT(file, out string outputWdtPath))
-                                    wdtFiles.Add(map, file);
+                                    wdtFiles.Add(map, outputWdtPath);
 
                                 // TODO: Just load Azeroth.wdt, while we figure how to actually generate map files from this.
                                 break;
