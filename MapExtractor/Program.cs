@@ -10,6 +10,7 @@ using AlphaCoreExtractor.MPQ;
 using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.DBC.Structures;
 
 namespace AlphaCoreExtractor
 {
@@ -39,7 +40,7 @@ namespace AlphaCoreExtractor
                 Environment.Exit(0);
             }
 
-            List<string> WDTFiles;
+            Dictionary<DBCMap, string> WDTFiles;
             if (!WDTExtractor.ExtractWDTFiles(out WDTFiles))
             {
                 Console.WriteLine("Unable to extract WDT files, exiting...");
@@ -54,9 +55,9 @@ namespace AlphaCoreExtractor
             //Begin loading all wdt information.
             if (!Globals.LoadAsync)
             {
-                foreach (var wdt in WDTFiles)
+                foreach (var entry in WDTFiles)
                 {
-                    var map = new CMapObj(wdt, null);
+                    var map = new CMapObj(entry.Key, entry.Value, null); // Key:DbcMap Value:FilePath
                     map.LoadData();
                     LoadedMaps.Add(map);
                     break;
@@ -64,9 +65,9 @@ namespace AlphaCoreExtractor
             }
             else
             {
-                foreach (var wdt in WDTFiles)
+                foreach (var entry in WDTFiles)
                 {
-                    AsyncMapLoader loadMapTask = new AsyncMapLoader(wdt);
+                    AsyncMapLoader loadMapTask = new AsyncMapLoader(entry.Key, entry.Value);
                     loadMapTask.OnMapLoaded += OnMapLoaded;
                     loadMapTask.RunWorkerAsync();
                     break;

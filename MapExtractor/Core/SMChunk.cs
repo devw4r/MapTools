@@ -4,12 +4,7 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
-
-using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Helpers;
-using AlphaCoreExtractor.DBC.Structures;
-
 
 namespace AlphaCoreExtractor.Core
 {
@@ -43,9 +38,7 @@ namespace AlphaCoreExtractor.Core
 
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
-
-        public static HashSet<uint> MCVTS = new HashSet<uint>();
-        public static HashSet<uint> MCNRS = new HashSet<uint>();
+        public MCLQSubChunk MCLQSubChunk;
 
         public SMChunk(byte[] chunk) : base(new MemoryStream(chunk))
         {
@@ -80,42 +73,129 @@ namespace AlphaCoreExtractor.Core
             // MCVT begin right after header.
             BuildSubMCVT(this, offsHeight);
 
-            if (Globals.Verbose)
-            {
-                if (!MCVTS.Contains(area))
-                {
-                    if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
-                        Console.WriteLine($"Built MCVT SubChunk for Area: {table.AreaName_enUS}");
-                    MCVTS.Add(area);
-                }
-            }
-
-            if (offsNormal > 0) //Has MCNR SubChunk
-            {
+            //Has MCNR SubChunk
+            if (offsNormal > 0)
                 BuildSubMCNR(this, offsNormal);
 
-                if (Globals.Verbose)
-                {
-                    if (!MCNRS.Contains(area))
-                    {
-                        if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
-                            Console.WriteLine($"Built MCNR SubChunk for Area: {table.AreaName_enUS}");
-                        MCNRS.Add(area);
-                    }
-                }
-            }
+            if (offsLayer > 0)
+                BuildMCLY(this, offsLayer);
+
+            if (offsRefs > 0)
+                BuildMCRF(this, offsRefs);
+
+            if (offsAlpha > 0)
+                BuildMCAL(this, offsAlpha, (int)sizeAlpha);
+
+            if (offsShadow > 0)
+                BuildMCSH(this, offsShadow, (int)sizeShadow);
+
+            if (offsSndEmitters > 0)
+                BuildMCSE(this, offsSndEmitters, (int)nSndEmitters);
+
+            if (offsLiquid > 0)
+                BuildSubMCLQ(this, offsLiquid);
         }
 
-        private void BuildSubMCNR(BinaryReader reader, uint offsNormal)
+        private void BuildSubMCLQ(BinaryReader reader, uint offset)
         {
-            reader.BaseStream.Position = offsNormal + HeaderOffsetEnd;
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
+            var dataHeader = new DataChunkHeader(reader);
+            if (dataHeader.Token == Tokens.MODF)
+                MCLQSubChunk = new MCLQSubChunk(reader);
+        }
+
+        private void BuildSubMCNR(BinaryReader reader, uint offset)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
             MCNRSubChunk = new MCNRSubChunk(reader);
         }
 
         // Offsets are relative to the end of MCNK header, in this case 0, read right away.
-        private void BuildSubMCVT(BinaryReader reader, uint offsHeight)
+        private void BuildSubMCVT(BinaryReader reader, uint offset)
         {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
             MCVTSubChunk = new MCVTSubChunk(reader);
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        private void BuildMCSE(BinaryReader reader, uint offset, int count)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
+            reader.ReadBytes(76 * count); //size of struct CWSoundEmitter
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        private void BuildMCSH(BinaryReader reader, uint offset, int size)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        private void BuildMCAL(BinaryReader reader, uint offset, int size)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
+            reader.ReadBytes(size);
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        private void BuildMCRF(BinaryReader reader, uint offset)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
+            var dataHeader = new DataChunkHeader(reader);
+            if (dataHeader.Token != Tokens.MCRF)
+                throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCRF]"}");
+            this.ReadBytes(dataHeader.Size);
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        private void BuildMCLY(BinaryReader reader, uint offset)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
+            var dataHeader = new DataChunkHeader(reader);
+            if (dataHeader.Token != Tokens.MCLY)
+                throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCLY]"}");
+            this.ReadBytes(dataHeader.Size);
         }
     }
 }

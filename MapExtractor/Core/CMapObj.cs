@@ -15,6 +15,7 @@ namespace AlphaCoreExtractor.Core
 {
     public class CMapObj : BinaryReaderProgress
     {
+        public DBCMap DBCMap;
         public string Name;
         public uint ADTVersion;
         public SMOHeader SMOHeader;
@@ -23,6 +24,7 @@ namespace AlphaCoreExtractor.Core
         public List<string> MapObjectsNames = new List<string>();
         public SMMapObjDef MODF;
         public List<CMapArea> MapAreaChunks = new List<CMapArea>();
+        public CMapArea[,] Tiles = new CMapArea[64, 64];
 
         public List<uint> GetUniqueAreaIDs()
         {
@@ -35,8 +37,9 @@ namespace AlphaCoreExtractor.Core
         }
 
         private BackgroundWorker Worker;
-        public CMapObj(string filePath, BackgroundWorker worker) : base(new MemoryStream(File.ReadAllBytes(filePath)))
+        public CMapObj(DBCMap dbcMap, string filePath, BackgroundWorker worker) : base(new MemoryStream(File.ReadAllBytes(filePath)))
         {
+            DBCMap = dbcMap;
             Name = Path.GetFileNameWithoutExtension(filePath);
             Console.WriteLine($"Loading map: {Name}");
             Worker = worker;
@@ -99,7 +102,7 @@ namespace AlphaCoreExtractor.Core
             Console.WriteLine("Found data for the following Areas:");
             foreach (var area in GetUniqueAreaIDs())
             {
-                if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
+                if (DBCStorage.TryGetAreaByAreaNumber(area, out AreaTable table))
                     Console.WriteLine($" AreaNumber: {table.AreaNumber}\tAreaName: {table.AreaName_enUS}");
                 else
                     Console.WriteLine($" No information found for Area id: {area}");
@@ -116,6 +119,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
+                if (this.IsEOF())
+                    return false;
+
                 uint adtNumber = 0;
                 foreach (var areaChunk in SMAreaChunks)
                 {
@@ -128,6 +134,10 @@ namespace AlphaCoreExtractor.Core
                     if (mapArea.Errors)
                         return false;
 
+                    if (Tiles[mapArea.ADT_BlockX, mapArea.ADT_BlockY] != null)
+                        throw new Exception("Invalid tile location.");
+
+                    Tiles[mapArea.ADT_BlockX, mapArea.ADT_BlockY] = mapArea;
                     MapAreaChunks.Add(mapArea);
                     adtNumber++;
                 }
@@ -145,6 +155,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
+                if (this.IsEOF())
+                    return false;
+
                 var dataHeader = new DataChunkHeader(this);
                 if (dataHeader.Token == Tokens.MODF)
                     MODF = new SMMapObjDef(this);
@@ -162,6 +175,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
+                if (this.IsEOF())
+                    return false;
+
                 var dataHeader = new DataChunkHeader(this);
                 if (dataHeader.Token != Tokens.MVER)
                     throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MVER]"}");
@@ -185,6 +201,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
+                if (this.IsEOF())
+                    return false;
+
                 var dataHeader = new DataChunkHeader(this);
                 if (dataHeader.Token != Tokens.MAIN)
                     throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MAIN]"}");
@@ -211,6 +230,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
+                if (this.IsEOF())
+                    return false;
+
                 var dataHeader = new DataChunkHeader(this);
                 if (dataHeader.Token != Tokens.MPHD)
                     throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MPHD]"}.");
@@ -235,6 +257,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
+                if (this.IsEOF())
+                    return false;
+
                 var dataHeader = new DataChunkHeader(this);
                 if (dataHeader.Token != Tokens.MDNM)
                     throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MDNM]"}.");
@@ -266,6 +291,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
+                if (this.IsEOF())
+                    return false;
+
                 var dataHeader = new DataChunkHeader(this);
                 if (dataHeader.Token != Tokens.MONM)
                     throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MONM]"}.");

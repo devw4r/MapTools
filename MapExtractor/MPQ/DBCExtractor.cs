@@ -4,7 +4,9 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 
 using MpqLib;
 using AlphaCoreExtractor.Helpers;
@@ -14,7 +16,8 @@ namespace AlphaCoreExtractor.MPQ
     public static class DBCExtractor
     {
         private static string OutputPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "dbc");
-        
+        private static List<string> InterestedDBC = new List<string>() { "AreaTable", "Map" };
+
         public static bool ExtractDBC()
         {
             try
@@ -40,11 +43,12 @@ namespace AlphaCoreExtractor.MPQ
                         if (!string.IsNullOrEmpty(entry.Filename))
                         {
                             var outputFileName = Path.Combine(OutputPath, Path.GetFileName(entry.Filename));
+                            var outputPlainName = Path.GetFileNameWithoutExtension(outputFileName);
 
                             if (File.Exists(outputFileName))
                                 File.Delete(outputFileName);
 
-                            if (entry.Filename.Equals("DBFilesClient\\AreaTable.dbc"))
+                            if (InterestedDBC.Any(name => outputPlainName.ToLower().Equals(name.ToLower())))
                             {
                                 byte[] buf = new byte[0x40000];
                                 using (Stream streamIn = archive.OpenFile(entry))
