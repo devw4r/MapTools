@@ -57,6 +57,7 @@ namespace AlphaCoreExtractor
                 foreach (var wdt in WDTFiles)
                 {
                     var map = new CMapObj(wdt, null);
+                    map.LoadData();
                     LoadedMaps.Add(map);
                     break;
                 }

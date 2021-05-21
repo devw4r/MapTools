@@ -45,7 +45,7 @@ namespace AlphaCoreExtractor.Core
 
         private void OnBinaryRead(object sender, EventArgs e)
         {
-            Worker.ReportProgress(0);
+            Worker?.ReportProgress(0);
         }
 
         public void LoadData()

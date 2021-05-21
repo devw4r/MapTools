@@ -4,7 +4,12 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
+
+using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.DBC.Structures;
+
 
 namespace AlphaCoreExtractor.Core
 {
@@ -39,6 +44,9 @@ namespace AlphaCoreExtractor.Core
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
 
+        public static HashSet<uint> MCVTS = new HashSet<uint>();
+        public static HashSet<uint> MCNRS = new HashSet<uint>();
+
         public SMChunk(byte[] chunk) : base(new MemoryStream(chunk))
         {
             flags = this.ReadUInt32();
@@ -69,12 +77,17 @@ namespace AlphaCoreExtractor.Core
 
             HeaderOffsetEnd = this.BaseStream.Position;
 
-            if (offsHeight > 0) //Has MCVT SubChunk
-            {
-                BuildSubMCVT(this, offsHeight);
+            // MCVT begin right after header.
+            BuildSubMCVT(this, offsHeight);
 
-                if (Globals.Verbose)
-                    Console.WriteLine($"Built MCVT SubChunk for Area: {area}");
+            if (Globals.Verbose)
+            {
+                if (!MCVTS.Contains(area))
+                {
+                    if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
+                        Console.WriteLine($"Built MCVT SubChunk for Area: {table.AreaName_enUS}");
+                    MCVTS.Add(area);
+                }
             }
 
             if (offsNormal > 0) //Has MCNR SubChunk
@@ -82,21 +95,26 @@ namespace AlphaCoreExtractor.Core
                 BuildSubMCNR(this, offsNormal);
 
                 if (Globals.Verbose)
-                    Console.WriteLine($"Built MCNR SubChunk for Area: {area}");
+                {
+                    if (!MCNRS.Contains(area))
+                    {
+                        if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
+                            Console.WriteLine($"Built MCNR SubChunk for Area: {table.AreaName_enUS}");
+                        MCNRS.Add(area);
+                    }
+                }
             }
         }
 
-        // Offsets are relative to the end of MCNK header.
-        // Todo, is this the correct way? given offset - HeaderOffsetEnd(128) ?
         private void BuildSubMCNR(BinaryReader reader, uint offsNormal)
         {
-            reader.BaseStream.Position = offsNormal - HeaderOffsetEnd;
+            reader.BaseStream.Position = offsNormal + HeaderOffsetEnd;
             MCNRSubChunk = new MCNRSubChunk(reader);
         }
 
+        // Offsets are relative to the end of MCNK header, in this case 0, read right away.
         private void BuildSubMCVT(BinaryReader reader, uint offsHeight)
         {
-            reader.BaseStream.Position = offsHeight - HeaderOffsetEnd;
             MCVTSubChunk = new MCVTSubChunk(reader);
         }
     }
