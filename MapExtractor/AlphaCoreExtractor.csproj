@@ -94,6 +94,14 @@
     <Compile Include="Core\CImVector.cs" />
     <Compile Include="Core\CMapArea.cs" />
     <Compile Include="Core\CMapObj.cs" />
+    <Compile Include="Core\CRange.cs" />
+    <Compile Include="Core\MCLQSubChunk.cs" />
+    <Compile Include="Core\SLTiles.cs" />
+    <Compile Include="Core\SLVert.cs" />
+    <Compile Include="Core\SMVert.cs" />
+    <Compile Include="Core\SOVert.cs" />
+    <Compile Include="Core\SWFlowv.cs" />
+    <Compile Include="Core\SWVert.cs" />
     <Compile Include="DBC\DBCStorage.cs" />
     <Compile Include="DBC\Reader\BinaryReaderExtensions.cs" />
     <Compile Include="DBC\Reader\DBCHeader.cs" />

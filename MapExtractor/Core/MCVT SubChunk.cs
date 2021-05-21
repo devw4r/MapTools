@@ -2,9 +2,8 @@
 // Discord: https://discord.gg/RzBMAKU
 // Github:  https://github.com/The-Alpha-Project
 
-using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 
 namespace AlphaCoreExtractor.Core
 {

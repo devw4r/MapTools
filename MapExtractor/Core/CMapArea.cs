@@ -30,7 +30,7 @@ namespace AlphaCoreExtractor.Core
             ADT_BlockY = adtNumber / 64;
 
             // MHDR offset
-            reader.BaseStream.Position = offset;
+            reader.SetPosition(offset);
 
             // AreaHeader
             if (!BuildAreaHeader(reader))
@@ -71,7 +71,7 @@ namespace AlphaCoreExtractor.Core
             {
                 foreach (var chunkInformation in ChunkInformation)
                 {
-                    reader.BaseStream.Position = chunkInformation.offset;
+                    reader.SetPosition(chunkInformation.offset);
 
                     var dataHeader = new DataChunkHeader(reader);
                     if (dataHeader.Token != Tokens.MCNK)
