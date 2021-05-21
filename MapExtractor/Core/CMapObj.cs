@@ -15,6 +15,7 @@ namespace AlphaCoreExtractor.Core
 {
     public class CMapObj : BinaryReaderProgress
     {
+        public DBCMap DBCMap;
         public string Name;
         public uint ADTVersion;
         public SMOHeader SMOHeader;
@@ -23,6 +24,7 @@ namespace AlphaCoreExtractor.Core
         public List<string> MapObjectsNames = new List<string>();
         public SMMapObjDef MODF;
         public List<CMapArea> MapAreaChunks = new List<CMapArea>();
+        public CMapArea[,] Tiles = new CMapArea[64, 64];
 
         public List<uint> GetUniqueAreaIDs()
         {
@@ -35,8 +37,9 @@ namespace AlphaCoreExtractor.Core
         }
 
         private BackgroundWorker Worker;
-        public CMapObj(string filePath, BackgroundWorker worker) : base(new MemoryStream(File.ReadAllBytes(filePath)))
+        public CMapObj(DBCMap dbcMap, string filePath, BackgroundWorker worker) : base(new MemoryStream(File.ReadAllBytes(filePath)))
         {
+            DBCMap = dbcMap;
             Name = Path.GetFileNameWithoutExtension(filePath);
             Console.WriteLine($"Loading map: {Name}");
             Worker = worker;
@@ -99,7 +102,7 @@ namespace AlphaCoreExtractor.Core
             Console.WriteLine("Found data for the following Areas:");
             foreach (var area in GetUniqueAreaIDs())
             {
-                if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
+                if (DBCStorage.TryGetAreaByAreaNumber(area, out AreaTable table))
                     Console.WriteLine($" AreaNumber: {table.AreaNumber}\tAreaName: {table.AreaName_enUS}");
                 else
                     Console.WriteLine($" No information found for Area id: {area}");
@@ -128,6 +131,10 @@ namespace AlphaCoreExtractor.Core
                     if (mapArea.Errors)
                         return false;
 
+                    if (Tiles[mapArea.ADT_BlockX, mapArea.ADT_BlockY] != null)
+                        throw new Exception("Invalid tile location.");
+
+                    Tiles[mapArea.ADT_BlockX, mapArea.ADT_BlockY] = mapArea;
                     MapAreaChunks.Add(mapArea);
                     adtNumber++;
                 }

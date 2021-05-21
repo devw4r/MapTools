@@ -84,7 +84,7 @@ namespace AlphaCoreExtractor.Core
             {
                 if (!MCVTS.Contains(area))
                 {
-                    if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
+                    if (DBCStorage.TryGetAreaByAreaNumber(area, out AreaTable table))
                         Console.WriteLine($"Built MCVT SubChunk for Area: {table.AreaName_enUS}");
                     MCVTS.Add(area);
                 }
@@ -98,7 +98,7 @@ namespace AlphaCoreExtractor.Core
                 {
                     if (!MCNRS.Contains(area))
                     {
-                        if (DBCStorage.TryGetByAreaNumber(area, out AreaTable table))
+                        if (DBCStorage.TryGetAreaByAreaNumber(area, out AreaTable table))
                             Console.WriteLine($"Built MCNR SubChunk for Area: {table.AreaName_enUS}");
                         MCNRS.Add(area);
                     }

@@ -99,6 +99,8 @@
     <Compile Include="DBC\Reader\DBCHeader.cs" />
     <Compile Include="DBC\Reader\DBCReader.cs" />
     <Compile Include="DBC\Structures\AreaTable.cs" />
+    <Compile Include="DBC\Structures\DBCMap.cs" />
+    <Compile Include="Generator\MapFilesGenerator.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Core\DataChunkHeader.cs" />
     <Compile Include="Helpers\Globals.cs" />

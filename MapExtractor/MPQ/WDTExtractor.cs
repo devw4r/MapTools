@@ -8,16 +8,18 @@ using System.Reflection;
 using System.Collections.Generic;
 
 using MpqLib;
+using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.DBC.Structures;
 
 namespace AlphaCoreExtractor.MPQ
 {
     public static class WDTExtractor
     {
         private static string OutputDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "wdt");
-        public static bool ExtractWDTFiles(out List<string> wdtFiles)
+        public static bool ExtractWDTFiles(out Dictionary<DBCMap, string> wdtFiles)
         {
-            wdtFiles = new List<string>();
+            wdtFiles = new Dictionary<DBCMap, string>();
 
             try
             {
@@ -35,16 +37,24 @@ namespace AlphaCoreExtractor.MPQ
 
                 foreach (var dir in Directory.EnumerateDirectories(Globals.MapsPath))
                 {
-                    foreach (var file in Directory.EnumerateFiles(dir))
+                    var folderMapName = Path.GetFileName(dir);
+                    if (DBCStorage.TryGetMapByName(folderMapName, out DBCMap map))
                     {
-                        if (file.Contains("wdt"))
+                        foreach (var file in Directory.EnumerateFiles(dir))
                         {
-                            if (ExtractWDT(file, out string outputWdtPath))
-                                wdtFiles.Add(outputWdtPath);
+                            if (file.Contains("wdt"))
+                            {
+                                if (ExtractWDT(file, out string outputWdtPath))
+                                    wdtFiles.Add(map, file);
 
-                            // TODO: Just load Azeroth.wdt, while we figure how to actually generate map files from this.
-                            break;
+                                // TODO: Just load Azeroth.wdt, while we figure how to actually generate map files from this.
+                                break;
+                            }
                         }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Unable to locate DBC map for: {folderMapName}");
                     }
 
                     // TODO: Just load Azeroth.wdt, while we figure how to actually generate map files from this.
