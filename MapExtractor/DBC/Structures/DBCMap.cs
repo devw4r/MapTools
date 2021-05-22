@@ -1,4 +1,8 @@
-﻿namespace AlphaCoreExtractor.DBC.Structures
+﻿// TheAlphaProject
+// Discord: https://discord.gg/RzBMAKU
+// Github:  https://github.com/The-Alpha-Project
+
+namespace AlphaCoreExtractor.DBC.Structures
 {
     public class DBCMap
     {

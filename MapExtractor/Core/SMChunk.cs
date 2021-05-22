@@ -8,7 +8,7 @@ using AlphaCoreExtractor.Helpers;
 
 namespace AlphaCoreExtractor.Core
 {
-    public class SMChunk : BinaryReader
+    public class SMChunk
     {
         public uint flags;
         public uint indexX;
@@ -40,60 +40,60 @@ namespace AlphaCoreExtractor.Core
         public MCVTSubChunk MCVTSubChunk;
         public MCLQSubChunk MCLQSubChunk;
 
-        public SMChunk(byte[] chunk) : base(new MemoryStream(chunk))
+        public SMChunk(BinaryReader reader)
         {
-            flags = this.ReadUInt32();
-            indexX = this.ReadUInt32();
-            indexY = this.ReadUInt32();
-            radius = this.ReadSingle();
-            nLayers = this.ReadUInt32();
-            nDoodadRefs = this.ReadUInt32();
-            offsHeight = this.ReadUInt32(); // MCVT
-            offsNormal = this.ReadUInt32(); // MCNR
-            offsLayer = this.ReadUInt32();  // MCLY
-            offsRefs = this.ReadUInt32();   // MCRF
-            offsAlpha = this.ReadUInt32();  // MCAL
-            sizeAlpha = this.ReadUInt32();
-            offsShadow = this.ReadUInt32(); // MCSH
-            sizeShadow = this.ReadUInt32();
-            area = this.ReadUInt32(); // in alpha: zone id (4) sub zone id (4)
-            nMapObjRefs = this.ReadUInt32();
-            holes_low_res = this.ReadUInt16();
-            padding = this.ReadUInt16();
-            predTex = this.ReadBytes(16); //It is used to determine which detail doodads to show.
-            noEffectDoodad = this.ReadBytes(8);
-            offsSndEmitters = this.ReadUInt32(); // MCSE
-            nSndEmitters = this.ReadUInt32();
-            offsLiquid = this.ReadUInt32(); // MCLQ
+            flags = reader.ReadUInt32();
+            indexX = reader.ReadUInt32();
+            indexY = reader.ReadUInt32();
+            radius = reader.ReadSingle();
+            nLayers = reader.ReadUInt32();
+            nDoodadRefs = reader.ReadUInt32();
+            offsHeight = reader.ReadUInt32(); // MCVT
+            offsNormal = reader.ReadUInt32(); // MCNR
+            offsLayer = reader.ReadUInt32();  // MCLY
+            offsRefs = reader.ReadUInt32();   // MCRF
+            offsAlpha = reader.ReadUInt32();  // MCAL
+            sizeAlpha = reader.ReadUInt32();
+            offsShadow = reader.ReadUInt32(); // MCSH
+            sizeShadow = reader.ReadUInt32();
+            area = reader.ReadUInt32(); // in alpha: zone id (4) sub zone id (4)
+            nMapObjRefs = reader.ReadUInt32();
+            holes_low_res = reader.ReadUInt16();
+            padding = reader.ReadUInt16();
+            predTex = reader.ReadBytes(16); //It is used to determine which detail doodads to show.
+            noEffectDoodad = reader.ReadBytes(8);
+            offsSndEmitters = reader.ReadUInt32(); // MCSE
+            nSndEmitters = reader.ReadUInt32();
+            offsLiquid = reader.ReadUInt32(); // MCLQ
 
-            unused = this.ReadBytes(24);
+            unused = reader.ReadBytes(24);
 
-            HeaderOffsetEnd = this.BaseStream.Position;
+            HeaderOffsetEnd = reader.BaseStream.Position;
 
             // MCVT begin right after header.
-            BuildSubMCVT(this, offsHeight);
+            BuildSubMCVT(reader, offsHeight);
 
             //Has MCNR SubChunk
             if (offsNormal > 0)
-                BuildSubMCNR(this, offsNormal);
+                BuildSubMCNR(reader, offsNormal);
 
             if (offsLayer > 0)
-                BuildMCLY(this, offsLayer);
+                BuildMCLY(reader, offsLayer);
 
             if (offsRefs > 0)
-                BuildMCRF(this, offsRefs);
+                BuildMCRF(reader, offsRefs);
 
             if (offsAlpha > 0)
-                BuildMCAL(this, offsAlpha, (int)sizeAlpha);
+                BuildMCAL(reader, offsAlpha, (int)sizeAlpha);
 
             if (offsShadow > 0)
-                BuildMCSH(this, offsShadow, (int)sizeShadow);
+                BuildMCSH(reader, offsShadow, (int)sizeShadow);
 
             if (offsSndEmitters > 0)
-                BuildMCSE(this, offsSndEmitters, (int)nSndEmitters);
+                BuildMCSE(reader, offsSndEmitters, (int)nSndEmitters);
 
             if (offsLiquid > 0)
-                BuildSubMCLQ(this, offsLiquid);
+                BuildSubMCLQ(reader, offsLiquid);
         }
 
         private void BuildSubMCLQ(BinaryReader reader, uint offset)
@@ -179,7 +179,7 @@ namespace AlphaCoreExtractor.Core
             var dataHeader = new DataChunkHeader(reader);
             if (dataHeader.Token != Tokens.MCRF)
                 throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCRF]"}");
-            this.ReadBytes(dataHeader.Size);
+            reader.ReadBytes(dataHeader.Size);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace AlphaCoreExtractor.Core
             var dataHeader = new DataChunkHeader(reader);
             if (dataHeader.Token != Tokens.MCLY)
                 throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCLY]"}");
-            this.ReadBytes(dataHeader.Size);
+            reader.ReadBytes(dataHeader.Size);
         }
     }
 }

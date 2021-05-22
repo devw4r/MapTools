@@ -29,13 +29,13 @@ namespace AlphaCoreExtractor.MPQ
                     Directory.Delete(OutputDirectory, true);
                 Directory.CreateDirectory(OutputDirectory);
 
-                if (!Directory.Exists(Globals.MapsPath))
+                if (!Directory.Exists(Globals.InputMapsPath))
                 {
-                    Console.WriteLine($"Unable to locate {Globals.MapsPath}, please check Config.txt and set a proper installation path.");
+                    Console.WriteLine($"Unable to locate {Globals.InputMapsPath}, please check Config.txt and set a proper installation path.");
                     return false;
                 }
 
-                foreach (var dir in Directory.EnumerateDirectories(Globals.MapsPath))
+                foreach (var dir in Directory.EnumerateDirectories(Globals.InputMapsPath))
                 {
                     var folderMapName = Path.GetFileName(dir);
                     if (DBCStorage.TryGetMapByName(folderMapName, out DBCMap map))
