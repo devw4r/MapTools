@@ -24,9 +24,9 @@ namespace AlphaCoreExtractor.MPQ
             {
                 Console.WriteLine("Extracting DBC files...");
                 //Check if dbc.MPQ exist.
-                if(!File.Exists(Globals.DBCPath))
+                if(!File.Exists(Paths.DBCPath))
                 {
-                    Console.WriteLine($"Unable to locate dbc.MPQ at path {Globals.DBCPath}, please check Config.txt and set a proper installation path.");
+                    Console.WriteLine($"Unable to locate dbc.MPQ at path {Paths.DBCPath}, please check Config.txt and set a proper installation path.");
                     return false;
                 }
 
@@ -35,7 +35,7 @@ namespace AlphaCoreExtractor.MPQ
                     Directory.Delete(OutputPath, true);
                 Directory.CreateDirectory(OutputPath);
 
-                using (MpqArchive archive = new MpqArchive(Globals.DBCPath))
+                using (MpqArchive archive = new MpqArchive(Paths.DBCPath))
                 {
                     archive.AddListfileFilenames();
                     foreach (var entry in archive)
