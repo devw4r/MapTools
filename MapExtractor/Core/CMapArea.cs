@@ -15,32 +15,32 @@ namespace AlphaCoreExtractor.Core
     public class CMapArea
     {
         /// <summary>
-        /// General Tile information,
+        /// General TileBlock information,
         /// </summary>
         public SMAreaHeader AreaHeader;
 
         /// <summary>
-        /// List of textures used for texturing the terrain in this tile.
+        /// List of textures used for texturing the terrain in this TileBlock.
         /// </summary>
         public MTEXChunk MTEXChunk;
 
         /// <summary>
-        /// MDX refs for this tile.
+        /// MDX refs for this TileBlock.
         /// </summary>
         public SMDoodadDef[] DoodadRefs;
 
         /// <summary>
-        /// WMO refs for this tile.
+        /// WMO refs for this TileBlock.
         /// </summary>
         public SMMapObjDef[] SMMapObjDefs;
 
         /// <summary>
-        /// Offsets/Sizes for each tile.
+        /// Offsets/Sizes for each Tile.
         /// </summary>
         public SMChunkInfo[,] TilesInformation = new SMChunkInfo[Constants.TileSize, Constants.TileSize];
 
         /// <summary>
-        /// The actual tile.
+        /// The actual Tiles.
         /// </summary>
         public SMChunk[,] Tiles = new SMChunk[Constants.TileSize, Constants.TileSize];
 
@@ -49,7 +49,7 @@ namespace AlphaCoreExtractor.Core
         /// </summary>
         public bool Errors = true;
 
-        public CMapArea(uint offset, BinaryReader reader, uint x, uint y)
+        public CMapArea(uint offset, BinaryReader reader)
         {
             // MHDR offset
             reader.SetPosition(offset);

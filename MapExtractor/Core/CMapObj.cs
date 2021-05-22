@@ -166,7 +166,7 @@ namespace AlphaCoreExtractor.Core
                             if (TileBlocks[x, y] != null)
                                 throw new Exception("Invalid tile location.");
 
-                            var mapArea = new CMapArea(tileBlock.offset, this, x, y);
+                            var mapArea = new CMapArea(tileBlock.offset, this);
 
                             if (mapArea.Errors)
                             {

@@ -29,7 +29,7 @@ namespace AlphaCoreExtractor.Generator
                             var mapID = map.DBCMap.ID.ToString("000");
                             var blockX = tileBlockX.ToString("00");
                             var blockY = tileBlockY.ToString("00");
-                            var outputFileName = $@"{Paths.OutputMapsPath}{mapID}{blockX}{blockY}.map";                        
+                            var outputFileName = $@"{Paths.OutputMapsPath}{mapID}{blockX}{blockY}.map";
 
                             using (FileStream fs = new FileStream(outputFileName, FileMode.Create))
                             {

@@ -21,7 +21,7 @@ namespace AlphaCoreExtractor.Core
             using (BinaryReader outerVerticesReader = new BinaryReader(new MemoryStream(reader.ReadBytes(324)))) // 81 * 4bytes
             using (BinaryReader innerVerticesReader = new BinaryReader(new MemoryStream(reader.ReadBytes(256)))) // 64 * 4bytes
             {
-                while(outerVerticesReader.BaseStream.Position != outerVerticesReader.BaseStream.Length)
+                while (outerVerticesReader.BaseStream.Position != outerVerticesReader.BaseStream.Length)
                 {
                     for (int i = 0; i < 9; i++)
                         Heights.Add(outerVerticesReader.ReadSingle());
