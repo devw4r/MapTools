@@ -11,6 +11,7 @@ using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.DBC.Structures;
+using AlphaCoreExtractor.Generator;
 
 namespace AlphaCoreExtractor
 {
@@ -26,6 +27,7 @@ namespace AlphaCoreExtractor
             SetDefaultTitle();
             PrintHeader();
 
+            // Extract Map.dbc and AreaTable.dbc
             if (!DBCExtractor.ExtractDBC())
             {
                 Console.WriteLine("Unable to extract DBC files, exiting...");
@@ -33,6 +35,7 @@ namespace AlphaCoreExtractor
                 Environment.Exit(0);
             }
 
+            // Load both files in memory.
             if (!DBCStorage.Initialize())
             {
                 Console.WriteLine("Unable to initialize DBC Storage, exiting...");
@@ -40,6 +43,7 @@ namespace AlphaCoreExtractor
                 Environment.Exit(0);
             }
 
+            // Extract available maps inside MPQ
             Dictionary<DBCMap, string> WDTFiles;
             if (!WDTExtractor.ExtractWDTFiles(out WDTFiles))
             {
@@ -59,6 +63,7 @@ namespace AlphaCoreExtractor
                 {
                     var map = new CMapObj(entry.Key, entry.Value, null); // Key:DbcMap Value:FilePath
                     map.LoadData();
+                    MapFilesGenerator.GenerateMapFiles(map);
                     LoadedMaps.Add(map);
                     break;
                 }

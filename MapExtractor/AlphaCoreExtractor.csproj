@@ -109,6 +109,7 @@
     <Compile Include="DBC\Structures\AreaTable.cs" />
     <Compile Include="DBC\Structures\DBCMap.cs" />
     <Compile Include="Generator\MapFilesGenerator.cs" />
+    <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Core\DataChunkHeader.cs" />
     <Compile Include="Helpers\Globals.cs" />
@@ -119,6 +120,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Helpers\AsyncMapLoaderEventArgs.cs" />
+    <Compile Include="Helpers\Paths.cs" />
     <Compile Include="MPQ\DBCExtractor.cs" />
     <Compile Include="MPQ\MpqLib\BitStream.cs" />
     <Compile Include="MPQ\MpqLib\MpqArchive.cs" />

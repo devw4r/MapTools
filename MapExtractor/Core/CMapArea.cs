@@ -5,30 +5,52 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+
+using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.DBC.Structures;
 
 namespace AlphaCoreExtractor.Core
 {
     public class CMapArea
     {
+        /// <summary>
+        /// General Tile information,
+        /// </summary>
         public SMAreaHeader AreaHeader;
-        public MTEXChunk MTEXChunk;
-        public SMDoodadDef[] DoodadRefs;
-        public SMMapObjDef[] SMMapObjDefs;
-        public SMChunkInfo[] ChunkInformation;
-        public List<SMChunk> MapChunks = new List<SMChunk>();
 
-        public uint ADT_BlockX = 0;
-        public uint ADT_BlockY = 0;
+        /// <summary>
+        /// List of textures used for texturing the terrain in this tile.
+        /// </summary>
+        public MTEXChunk MTEXChunk;
+
+        /// <summary>
+        /// MDX refs for this tile.
+        /// </summary>
+        public SMDoodadDef[] DoodadRefs;
+
+        /// <summary>
+        /// WMO refs for this tile.
+        /// </summary>
+        public SMMapObjDef[] SMMapObjDefs;
+
+        /// <summary>
+        /// Offsets/Sizes for each tile.
+        /// </summary>
+        public SMChunkInfo[,] TilesInformation = new SMChunkInfo[Constants.TileSize, Constants.TileSize];
+
+        /// <summary>
+        /// The actual tile.
+        /// </summary>
+        public SMChunk[,] Tiles = new SMChunk[Constants.TileSize, Constants.TileSize];
+
+        /// <summary>
+        /// Failed to parse something?
+        /// </summary>
         public bool Errors = true;
 
-        public CMapArea(uint offset, BinaryReader reader, uint adtNumber)
+        public CMapArea(uint offset, BinaryReader reader, uint x, uint y)
         {
-            // This would be the BlockX,BlockY of the adt file, if we had them split.
-            // World/Maps/<InternalMapName>/<InternalMapName>_<BlockX>_<BlockY>.adt.
-            ADT_BlockX = adtNumber % 64;
-            ADT_BlockY = adtNumber / 64;
-
             // MHDR offset
             reader.SetPosition(offset);
 
@@ -69,16 +91,18 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
-                foreach (var chunkInformation in ChunkInformation)
+                for (int x = 0; x < Constants.TileSize; x++)
                 {
-                    reader.SetPosition(chunkInformation.offset);
+                    for (int y = 0; y < Constants.TileSize; y++)
+                    {
+                        reader.SetPosition(TilesInformation[x, y].offset);
 
-                    var dataHeader = new DataChunkHeader(reader);
-                    if (dataHeader.Token != Tokens.MCNK)
-                        throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCNK]"}");
+                        var dataHeader = new DataChunkHeader(reader);
+                        if (dataHeader.Token != Tokens.MCNK)
+                            throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCNK]"}");
 
-                    var dataChunk = reader.ReadBytes(dataHeader.Size);
-                    MapChunks.Add(new SMChunk(dataChunk));
+                        Tiles[x, y] = new SMChunk(reader);
+                    }
                 }
                 return true;
             }
@@ -159,8 +183,11 @@ namespace AlphaCoreExtractor.Core
                 if (dataHeader.Token != Tokens.MCIN)
                     throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCIN]"}");
 
-                var dataChunk = reader.ReadBytes(dataHeader.Size);
-                ChunkInformation = SMChunkInfo.BuildFromChunk(dataChunk);
+                // All tiles should be used, meaming we should have valid offset and size for each tile.
+                for (int x = 0; x < Constants.TileSize; x++)
+                    for (int y = 0; y < Constants.TileSize; y++)
+                        TilesInformation[x, y] = new SMChunkInfo(reader);
+
                 return true;
             }
             catch (Exception ex)
@@ -189,5 +216,28 @@ namespace AlphaCoreExtractor.Core
 
             return false;
         }
+
+        #region #Helpers
+        public IEnumerable<string> GetAreaNames()
+        {
+            HashSet<uint> areas = new HashSet<uint>();
+
+            for (int x = 0; x < Constants.TileSize; x++)
+            {
+                for (int y = 0; y < Constants.TileSize; y++)
+                {
+                    var areaID = Tiles[x, y].area;
+                    if (!areas.Contains(areaID))
+                    {
+                        if (DBCStorage.TryGetAreaByAreaNumber(areaID, out AreaTable areaTable))
+                            yield return areaTable.AreaName_enUS;
+                        else
+                            yield return $"Unknown area {areaID}";
+                        areas.Add(areaID);
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }
