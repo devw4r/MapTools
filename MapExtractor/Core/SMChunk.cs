@@ -8,7 +8,7 @@ using AlphaCoreExtractor.Helpers;
 
 namespace AlphaCoreExtractor.Core
 {
-    public class SMChunk
+    public class SMChunk : IDisposable
     {
         public uint flags;
         public uint indexX;
@@ -196,6 +196,13 @@ namespace AlphaCoreExtractor.Core
             if (dataHeader.Token != Tokens.MCLY)
                 throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCLY]"}");
             reader.ReadBytes(dataHeader.Size);
+        }
+
+        public void Dispose()
+        {
+            MCNRSubChunk = null;
+            MCVTSubChunk = null;
+            MCLQSubChunk = null;
         }
     }
 }

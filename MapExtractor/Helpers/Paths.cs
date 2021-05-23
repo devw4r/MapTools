@@ -40,7 +40,13 @@ namespace AlphaCoreExtractor.Helpers
             get
             {
                 if (!string.IsNullOrEmpty(_cacheOutputMapPath))
+                {
+                    if (!Directory.Exists(_cacheOutputMapPath))
+                        Directory.CreateDirectory(_cacheOutputMapPath);
+
                     return _cacheOutputMapPath;
+                }
+
                 _cacheOutputMapPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"maps\");
 
                 if (!Directory.Exists(_cacheOutputMapPath))

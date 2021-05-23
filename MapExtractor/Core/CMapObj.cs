@@ -4,10 +4,9 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using System.ComponentModel;
-using AlphaCoreExtractor.DBC;
 using System.Collections.Generic;
+
+using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.DBC.Structures;
 
@@ -71,77 +70,79 @@ namespace AlphaCoreExtractor.Core
         /// <summary>
         /// How many tiles we have information for.
         /// </summary>
-        public uint UnUsableTiles => 256 - UsableTiles;
+        public uint UnUsableTiles => 4096 - UsableTiles;
 
         /// <summary>
-        /// Used to report 'progress' everytime we read bytes.
+        /// Used to read file tokens and validate chunks.
         /// </summary>
-        private BackgroundWorker AsyncLoadWorker;
+        private DataChunkHeader DataChunkHeader = new DataChunkHeader();
 
-        public CMapObj(DBCMap dbcMap, string filePath, BackgroundWorker worker) : base(new MemoryStream(File.ReadAllBytes(filePath)))
+
+        public CMapObj(DBCMap dbcMap, string filePath) : base(new MemoryStream(File.ReadAllBytes(filePath)))
         {
-            AsyncLoadWorker = worker;
             DBCMap = dbcMap;
-            if (!dbcMap.MapName_enUS.Equals(Path.GetFileNameWithoutExtension(filePath)))
-                throw new Exception("File map name nad DBC map name differs.");
-            else
+            if (dbcMap.MapName_enUS.Equals(Path.GetFileNameWithoutExtension(filePath)))
                 Name = dbcMap.MapName_enUS;
+            else
+                Name = Path.GetFileNameWithoutExtension(filePath);
 
-            OnRead += new EventHandler((o, e) => AsyncLoadWorker?.ReportProgress(0));
+            LoadData();
         }
 
         public void LoadData()
         {
-            Console.WriteLine($"Loading map: {Name} ContinentID: {DBCMap.ID} IsInstance: {DBCMap.IsInMap != 1}");
+            Logger.Notice($"Processing map: {Name} ContinentID: {DBCMap.ID} IsInstance: {DBCMap.IsInMap != 1}");
 
             // File version, must be 18.
-            Console.WriteLine("Reading file version...");
+            if (Globals.Verbose) Logger.Info("Reading file version...");
             if (!ReadMVER())
                 return;
 
             // MapHeader
-            Console.WriteLine("Reading map header...");
+            if (Globals.Verbose) Logger.Info("Reading map header...");
             if (!ReadMPHD())
                 return;
 
             // Map tile table. Needs to contain 64x64 = 4096 entries of sizeof(SMAreaInfo)
-            Console.WriteLine("Reading MAIN section...");
+            if (Globals.Verbose) Logger.Info("Reading MAIN section...");
             if (!ReadMAIN())
                 return;
 
             // Filenames Doodads. Zero-terminated strings with complete paths to models.
-            Console.WriteLine("Reading Doodads file names...");
+            if (Globals.Verbose) Logger.Info("Reading Doodads file names...");
             if (!ReadMDNM())
                 return;
 
             // Filenames WMOS. Zero-terminated strings with complete paths to models.
-            Console.WriteLine("Reading WMOS file names...");
+            if (Globals.Verbose) Logger.Info("Reading WMOS file names...");
             if (!ReadMONM())
                 return;
 
             // Only one instance is possible. It is usually used by WMO based maps which contain no ADT parts with the exception of RazorfenDowns.
             // If this chunk exists, the client marks the map as a dungeon and uses absolute positioning for lights.
-            Console.WriteLine("Reading MODF section...");
+            if (Globals.Verbose) Logger.Info("Reading MODF section...");
             if (!ReadMODF())
                 return;
 
             // The start of what is now the ADT files.
-            Console.WriteLine($"Reading {TileBlocksInformation.Length} TileBlocks information...");
+            if (Globals.Verbose) Logger.Info($"Reading {TileBlocksInformation.Length} TileBlocks information...");
             if (!LoadMapAreaChunks())
                 return;
 
-            Console.WriteLine();
-            Console.WriteLine($"Map information:");
-            Console.WriteLine($"ADT Version: {ADTVersion}");
-            Console.Write(SMOHeader.ToString());
-            Console.WriteLine($"DoodadsNames (.wdx): {DoodadsNames.Count}");
-            Console.WriteLine($"MapObjectsNames (.wmo): {MapObjectsNames.Count}");
-            Console.WriteLine($"Usable Tiles: {UsableTiles}");
-            Console.WriteLine($"UnUsable Tiles: {UnUsableTiles}");
-            PrintTileInformation();
-            Console.WriteLine();
+            if (Globals.Verbose)
+            {
+                Console.WriteLine();
+                Logger.Notice($"Map information:");
+                Logger.Info($"ADT Version: {ADTVersion}");
+                Logger.Info(SMOHeader.ToString());
+                Logger.Info($"DoodadsNames (.wdx): {DoodadsNames.Count}");
+                Logger.Info($"MapObjectsNames (.wmo): {MapObjectsNames.Count}");
+                Logger.Info($"Usable Tiles: {UsableTiles}");
+                Logger.Info($"UnUsable Tiles: {UnUsableTiles}");
+                PrintTileBlockInformation();
+            }
 
-            Console.WriteLine("Map loading complete.");
+            Logger.Success("Map information loaded successfully.");
         }
 
         /// <summary>
@@ -166,11 +167,11 @@ namespace AlphaCoreExtractor.Core
                             if (TileBlocks[x, y] != null)
                                 throw new Exception("Invalid tile location.");
 
-                            var mapArea = new CMapArea(tileBlock.offset, this);
+                            var mapArea = new CMapArea(tileBlock.offset, this, DataChunkHeader);
 
                             if (mapArea.Errors)
                             {
-                                Console.WriteLine($"[WARNING] Unable to load information for tile {x},{y}");
+                                Logger.Warning($"[WARNING] Unable to load information for tile {x},{y}");
                                 continue;
                             }
 
@@ -184,7 +185,7 @@ namespace AlphaCoreExtractor.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -197,14 +198,14 @@ namespace AlphaCoreExtractor.Core
                 if (this.IsEOF())
                     return false;
 
-                var dataHeader = new DataChunkHeader(this);
-                if (dataHeader.Token == Tokens.MODF)
+                DataChunkHeader.Fill(this);
+                if (DataChunkHeader.Token == Tokens.MODF)
                     MODF = new SMMapObjDef(this);
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -217,20 +218,20 @@ namespace AlphaCoreExtractor.Core
                 if (this.IsEOF())
                     return false;
 
-                var dataHeader = new DataChunkHeader(this);
-                if (dataHeader.Token != Tokens.MVER)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MVER]"}");
+                DataChunkHeader.Fill(this);
+                if (DataChunkHeader.Token != Tokens.MVER)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MVER]"}");
 
                 ADTVersion = this.ReadUInt32();
 
                 if (Globals.Verbose)
-                    Console.WriteLine($"[MVER] Success.");
+                    Logger.Success($"[MVER]");
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -243,24 +244,22 @@ namespace AlphaCoreExtractor.Core
                 if (this.IsEOF())
                     return false;
 
-                var dataHeader = new DataChunkHeader(this);
-                if (dataHeader.Token != Tokens.MAIN)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MAIN]"}");
+                DataChunkHeader.Fill(this);
+                if (DataChunkHeader.Token != Tokens.MAIN)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MAIN]"}");
 
                 for (int x = 0; x < 64; x++)
                     for (int y = 0; y < 64; y++)
                         TileBlocksInformation[x, y] = new SMAreaInfo(this);
 
                 if (Globals.Verbose)
-                {
-                    Console.WriteLine($"Loaded {TileBlocksInformation.Length * TileBlocksInformation.Length} MapAreaChunks");
-                    Console.WriteLine($"[MAIN] Success.");
-                }
+                    Logger.Info($"Loaded {TileBlocksInformation.Length * TileBlocksInformation.Length} MapAreaChunks");
+
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -273,21 +272,21 @@ namespace AlphaCoreExtractor.Core
                 if (this.IsEOF())
                     return false;
 
-                var dataHeader = new DataChunkHeader(this);
-                if (dataHeader.Token != Tokens.MPHD)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MPHD]"}.");
+                DataChunkHeader.Fill(this);
+                if (DataChunkHeader.Token != Tokens.MPHD)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MPHD]"}.");
 
-                var byteChunk = this.ReadBytes(dataHeader.Size);
+                var byteChunk = this.ReadBytes(DataChunkHeader.Size);
                 SMOHeader = new SMOHeader(byteChunk);
 
                 if (Globals.Verbose)
-                    Console.WriteLine($"[MPHD] Success.");
+                    Logger.Success($"[MPHD]");
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -300,28 +299,25 @@ namespace AlphaCoreExtractor.Core
                 if (this.IsEOF())
                     return false;
 
-                var dataHeader = new DataChunkHeader(this);
-                if (dataHeader.Token != Tokens.MDNM)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MDNM]"}.");
+                DataChunkHeader.Fill(this);
+                if (DataChunkHeader.Token != Tokens.MDNM)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MDNM]"}.");
 
-                if (dataHeader.Size > 0)
+                if (DataChunkHeader.Size > 0)
                 {
-                    long final_position = this.BaseStream.Position + dataHeader.Size;
+                    long final_position = this.BaseStream.Position + DataChunkHeader.Size;
                     while (this.BaseStream.Position < final_position)
                         DoodadsNames.Add(this.ReadCString());
                 }
 
                 if (Globals.Verbose)
-                {
-                    Console.WriteLine($"Loaded {DoodadsNames.Count} DoodadNames.");
-                    Console.WriteLine($"[MDNM] Success.");
-                }
+                    Logger.Success($"Loaded {DoodadsNames.Count} DoodadNames.");
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -334,34 +330,31 @@ namespace AlphaCoreExtractor.Core
                 if (this.IsEOF())
                     return false;
 
-                var dataHeader = new DataChunkHeader(this);
-                if (dataHeader.Token != Tokens.MONM)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MONM]"}.");
+                DataChunkHeader.Fill(this);
+                if (DataChunkHeader.Token != Tokens.MONM)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MONM]"}.");
 
-                if (dataHeader.Size > 0)
+                if (DataChunkHeader.Size > 0)
                 {
-                    long final_position = this.BaseStream.Position + dataHeader.Size;
+                    long final_position = this.BaseStream.Position + DataChunkHeader.Size;
                     while (this.BaseStream.Position < final_position)
                         MapObjectsNames.Add(this.ReadCString());
                 }
 
                 if (Globals.Verbose)
-                {
-                    Console.WriteLine($"Loaded {MapObjectsNames.Count} MapObjectsNames.");
-                    Console.WriteLine($"[MONM] Success.");
-                }
+                    Logger.Success($"Loaded {MapObjectsNames.Count} MapObjectsNames.");
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
         }
 
-        public void PrintTileInformation()
+        public void PrintTileBlockInformation()
         {
             for (int x = 0; x < Constants.TileBlockSize; x++)
             {
@@ -369,12 +362,29 @@ namespace AlphaCoreExtractor.Core
                 {
                     if (TileBlocks[x, y] != null)
                     {
-                        Console.WriteLine($"Tile: {Name}_{x}_{y}");
+                        Logger.Notice($"Tile: {Name}_{x}_{y}");
                         foreach (var areaName in TileBlocks[x, y].GetAreaNames())
-                            Console.WriteLine($" {areaName}");
+                            Logger.Info($" {areaName}");
                     }
                 }
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            DBCMap = null;
+            Name = string.Empty;
+            SMOHeader = null;
+            TileBlocksInformation = null;
+            DoodadsNames.Clear();
+            DoodadsNames = null;
+            MapObjectsNames.Clear();
+            MapObjectsNames = null;
+            MODF = null;
+            TileBlocks = null;
+            DataChunkHeader = null;
+
+            base.Dispose(disposing);
         }
     }
 }

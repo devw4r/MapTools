@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using AlphaCoreExtractor.Log;
 
 namespace AlphaCoreExtractor.DBC.Reader
 {
@@ -63,7 +64,7 @@ namespace AlphaCoreExtractor.DBC.Reader
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while loading {dbcFile}: {ex.Message}");
+                Logger.Error($"Error while loading {dbcFile}: {ex.Message}");
             }
 
             return tempList;
@@ -100,7 +101,7 @@ namespace AlphaCoreExtractor.DBC.Reader
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while loading {dbcFile}: {ex.Message}");
+                Logger.Error($"Error while loading {dbcFile}: {ex.Message}");
             }
 
             return tempList;

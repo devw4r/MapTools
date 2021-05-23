@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
+using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.DBC.Reader;
 using AlphaCoreExtractor.DBC.Structures;
 
@@ -26,7 +27,7 @@ namespace AlphaCoreExtractor.DBC
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -42,12 +43,12 @@ namespace AlphaCoreExtractor.DBC
             map = null;
             try
             {
-                map = Maps.Values.First(v => v.MapName_enUS.ToLower().Equals(name.ToLower()));
+                map = Maps.Values.First(v => (v.MapName_enUS.ToLower().Replace("instance","").Trim()).Equals(name.ToLower()) || v.Directory.ToLower().Equals(name.ToLower()));
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -77,7 +78,7 @@ namespace AlphaCoreExtractor.DBC
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -93,7 +94,7 @@ namespace AlphaCoreExtractor.DBC
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
