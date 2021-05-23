@@ -23,9 +23,29 @@ namespace AlphaCoreExtractor
         public static List<DBCMap> LoadedMaps = new List<DBCMap>();
         private static Version Version;
         private static Queue<char> Loading = new Queue<char>();
-        private static Timer ProgressTimer = new Timer(Tick, null, 0, 1000);
+        private static Thread MapsThread;
+        private static volatile bool IsRunning = false;
 
         static void Main(string[] args)
+        {
+            IsRunning = true;
+            MapsThread = new Thread(new ThreadStart(StartProcess));
+            MapsThread.Name = "MapsThread";
+            MapsThread.Start();
+
+            while (IsRunning)
+            {
+                Thread.Sleep(1000);
+                UpdateLoadingStatus();
+            }
+
+            MapsThread.Join(2000);
+            MapsThread.Interrupt();
+            Console.ReadLine();
+            SetDefaultTitle();
+        }
+
+        private static void StartProcess()
         {
             Version = Assembly.GetExecutingAssembly().GetName().Version;
             SetDefaultTitle();
@@ -61,7 +81,7 @@ namespace AlphaCoreExtractor
                 // Flush .map files output dir.
                 Directory.Delete(Paths.OutputMapsPath, true);
 
-                //Begin oarsing and generating .map files.
+                //Begin parsing adt files and generate .map files.
                 foreach (var entry in WDTFiles)
                 {
                     using (CMapObj map = new CMapObj(entry.Key, entry.Value)) // Key:DbcMap Value:FilePath
@@ -76,7 +96,6 @@ namespace AlphaCoreExtractor
                 WDTFiles?.Clear();
                 Console.WriteLine();
                 Logger.Success("Process Complete, press any key to exit...");
-                Console.ReadLine();
             }
             catch (Exception ex)
             {
@@ -84,16 +103,8 @@ namespace AlphaCoreExtractor
             }
             finally
             {
-                // Todo, this time wont die.
-                ProgressTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                ProgressTimer?.Dispose();
-                SetDefaultTitle();
+                IsRunning = false;
             }
-        }
-
-        private static void Tick(object state)
-        {
-            UpdateLoadingStatus();
         }
 
         #region crap
@@ -115,11 +126,18 @@ namespace AlphaCoreExtractor
         /// </summary>
         private static void UpdateLoadingStatus()
         {
-            Loading.Enqueue('.');
-            Console.Title = $"AlphaCore Map Extractor {Version}  |  Working, please wait {string.Join("", Loading.ToArray())}";
+            if (IsRunning)
+            {
+                Loading.Enqueue('.');
+                Console.Title = $"AlphaCore Map Extractor {Version}  |  Working, please wait {string.Join("", Loading.ToArray())}";
 
-            if (Loading.Count > 5)
-                Loading.Clear();
+                if (Loading.Count > 5)
+                    Loading.Clear();
+            }
+            else
+            {
+                SetDefaultTitle();
+            }
         }
         #endregion
     }
