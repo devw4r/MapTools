@@ -3,7 +3,6 @@
 // Github:  https://github.com/The-Alpha-Project
 
 using System.IO;
-using System.Collections.Generic;
 
 namespace AlphaCoreExtractor.Core
 {
@@ -13,24 +12,23 @@ namespace AlphaCoreExtractor.Core
     /// </summary>
     public class MCVTSubChunk
     {
-        public List<float> Heights = new List<float>(); // [9 * 9 + 8 * 8] (145);
+        public float[,] V9 = new float[9, 9];
+        public float[,] V8 = new float[8, 8];
 
         public MCVTSubChunk(BinaryReader reader)
         {
-            // Interleave vertices (9-8-9-8)
             using (BinaryReader outerVerticesReader = new BinaryReader(new MemoryStream(reader.ReadBytes(324)))) // 81 * 4bytes
+            {
+                for (int x = 0; x < 9; x++)
+                    for (int y = 0; y < 9; y++)
+                        V9[x, y] = outerVerticesReader.ReadSingle();
+            }
+
             using (BinaryReader innerVerticesReader = new BinaryReader(new MemoryStream(reader.ReadBytes(256)))) // 64 * 4bytes
             {
-                while (outerVerticesReader.BaseStream.Position != outerVerticesReader.BaseStream.Length)
-                {
-                    for (int i = 0; i < 9; i++)
-                        Heights.Add(outerVerticesReader.ReadSingle());
-
-                    // If we reached the end, skip inner vertices.
-                    if (innerVerticesReader.BaseStream.Position != innerVerticesReader.BaseStream.Length)
-                        for (int j = 0; j < 8; j++)
-                            Heights.Add(innerVerticesReader.ReadSingle());
-                }
+                for (int x = 0; x < 8; x++)
+                    for (int y = 0; y < 8; y++)
+                        V8[x, y] = innerVerticesReader.ReadSingle();
             }
         }
     }

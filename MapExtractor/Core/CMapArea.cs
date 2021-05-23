@@ -7,12 +7,13 @@ using System.IO;
 using System.Collections.Generic;
 
 using AlphaCoreExtractor.DBC;
+using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.DBC.Structures;
 
 namespace AlphaCoreExtractor.Core
 {
-    public class CMapArea
+    public class CMapArea : IDisposable
     {
         /// <summary>
         /// General TileBlock information,
@@ -49,8 +50,15 @@ namespace AlphaCoreExtractor.Core
         /// </summary>
         public bool Errors = true;
 
-        public CMapArea(uint offset, BinaryReader reader)
+        /// <summary>
+        /// Used to read file tokens and validate chunks.
+        /// </summary>
+        private DataChunkHeader DataChunkHeader;
+
+        public CMapArea(uint offset, BinaryReader reader, DataChunkHeader dataChunkHeader)
         {
+            DataChunkHeader = dataChunkHeader;
+
             // MHDR offset
             reader.SetPosition(offset);
 
@@ -97,9 +105,9 @@ namespace AlphaCoreExtractor.Core
                     {
                         reader.SetPosition(TilesInformation[x, y].offset);
 
-                        var dataHeader = new DataChunkHeader(reader);
-                        if (dataHeader.Token != Tokens.MCNK)
-                            throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCNK]"}");
+                        DataChunkHeader.Fill(reader);
+                        if (DataChunkHeader.Token != Tokens.MCNK)
+                            throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MCNK]"}");
 
                         Tiles[x, y] = new SMChunk(reader);
                     }
@@ -108,7 +116,7 @@ namespace AlphaCoreExtractor.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -118,18 +126,18 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
-                var dataHeader = new DataChunkHeader(reader);
-                if (dataHeader.Token != Tokens.MODF)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MODF]"}");
+                DataChunkHeader.Fill(reader);
+                if (DataChunkHeader.Token != Tokens.MODF)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MODF]"}");
 
                 //MODF (Placement information for WMOs. Additional to this, the WMOs to render are referenced in each MCRF chunk)
-                var dataChunk = reader.ReadBytes(dataHeader.Size);
+                var dataChunk = reader.ReadBytes(DataChunkHeader.Size);
                 SMMapObjDefs = SMMapObjDef.BuildFromChunk(dataChunk);
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -139,17 +147,17 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
-                var dataHeader = new DataChunkHeader(reader);
-                if (dataHeader.Token != Tokens.MDDF)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MDDF]"}");
+                DataChunkHeader.Fill(reader);
+                if (DataChunkHeader.Token != Tokens.MDDF)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MDDF]"}");
 
-                var dataChunk = reader.ReadBytes(dataHeader.Size);
+                var dataChunk = reader.ReadBytes(DataChunkHeader.Size);
                 DoodadRefs = SMDoodadDef.BuildFromChunck(dataChunk);
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -159,17 +167,17 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
-                var dataHeader = new DataChunkHeader(reader);
-                if (dataHeader.Token != Tokens.MTEX)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MTEX]"}");
+                DataChunkHeader.Fill(reader);
+                if (DataChunkHeader.Token != Tokens.MTEX)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MTEX]"}");
 
-                var dataChunk = reader.ReadBytes(dataHeader.Size);
+                var dataChunk = reader.ReadBytes(DataChunkHeader.Size);
                 MTEXChunk = MTEXChunk.BuildFromChunk(dataChunk);
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -179,9 +187,9 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
-                var dataHeader = new DataChunkHeader(reader);
-                if (dataHeader.Token != Tokens.MCIN)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCIN]"}");
+                DataChunkHeader.Fill(reader);
+                if (DataChunkHeader.Token != Tokens.MCIN)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MCIN]"}");
 
                 // All tiles should be used, meaming we should have valid offset and size for each tile.
                 for (int x = 0; x < Constants.TileSize; x++)
@@ -192,7 +200,7 @@ namespace AlphaCoreExtractor.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -202,16 +210,16 @@ namespace AlphaCoreExtractor.Core
         {
             try
             {
-                var dataHeader = new DataChunkHeader(reader);
-                if (dataHeader.Token != Tokens.MHDRChunk)
-                    throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MHDRChunk]"}");
+                DataChunkHeader.Fill(reader);
+                if (DataChunkHeader.Token != Tokens.MHDRChunk)
+                    throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MHDRChunk]"}");
 
                 AreaHeader = new SMAreaHeader(reader);
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -239,5 +247,20 @@ namespace AlphaCoreExtractor.Core
             }
         }
         #endregion
+
+        public void Dispose()
+        {
+            AreaHeader = null;
+            MTEXChunk = null;
+            DoodadRefs = null;
+            SMMapObjDefs = null;
+            TilesInformation = null;
+
+            foreach (var tile in Tiles)
+                tile.Dispose();
+
+            Tiles = null;
+            DataChunkHeader = null;
+        }
     }
 }

@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Collections.Generic;
 
 using MpqLib;
+using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
 
 namespace AlphaCoreExtractor.MPQ
@@ -22,11 +23,11 @@ namespace AlphaCoreExtractor.MPQ
         {
             try
             {
-                Console.WriteLine("Extracting DBC files...");
+                Logger.Notice("Extracting DBC files...");
                 //Check if dbc.MPQ exist.
                 if(!File.Exists(Paths.DBCPath))
                 {
-                    Console.WriteLine($"Unable to locate dbc.MPQ at path {Paths.DBCPath}, please check Config.txt and set a proper installation path.");
+                    Logger.Error($"Unable to locate dbc.MPQ at path {Paths.DBCPath}, please check Config.txt and set a proper installation path.");
                     return false;
                 }
 
@@ -62,14 +63,13 @@ namespace AlphaCoreExtractor.MPQ
                                                 break;
 
                                             streamOut.Write(buf, 0, cb);
-                                            Program.UpdateLoadingStatus();
                                         }
 
                                         streamOut.Close();
                                     }
                                 }
 
-                                Console.WriteLine($"Extracted DBC file {entry.Filename}");
+                                Logger.Success($"Extracted DBC file {entry.Filename}");
                             }
                         }
                     }
@@ -79,7 +79,7 @@ namespace AlphaCoreExtractor.MPQ
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;

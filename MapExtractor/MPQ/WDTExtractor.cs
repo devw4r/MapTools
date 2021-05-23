@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 using MpqLib;
 using AlphaCoreExtractor.DBC;
+using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.DBC.Structures;
 
@@ -23,7 +24,7 @@ namespace AlphaCoreExtractor.MPQ
 
             try
             {
-                Console.WriteLine("Extracting WDT files...");
+                Logger.Notice("Extracting WDT files...");
                 // Clean up output directory if neccesary.
                 if (Directory.Exists(OutputDirectory))
                     Directory.Delete(OutputDirectory, true);
@@ -31,7 +32,7 @@ namespace AlphaCoreExtractor.MPQ
 
                 if (!Directory.Exists(Paths.InputMapsPath))
                 {
-                    Console.WriteLine($"Unable to locate {Paths.InputMapsPath}, please check Config.txt and set a proper installation path.");
+                    Logger.Error($"Unable to locate {Paths.InputMapsPath}, please check Config.txt and set a proper installation path.");
                     return false;
                 }
 
@@ -46,26 +47,20 @@ namespace AlphaCoreExtractor.MPQ
                             {
                                 if (ExtractWDT(file, out string outputWdtPath))
                                     wdtFiles.Add(map, outputWdtPath);
-
-                                // TODO: Just load Azeroth.wdt, while we figure how to actually generate map files from this.
-                                break;
                             }
                         }
                     }
                     else
                     {
-                        Console.WriteLine($"Unable to locate DBC map for: {folderMapName}");
+                        Logger.Warning($"Unable to locate DBC map for: {folderMapName}");
                     }
-
-                    // TODO: Just load Azeroth.wdt, while we figure how to actually generate map files from this.
-                    break;
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
@@ -81,7 +76,7 @@ namespace AlphaCoreExtractor.MPQ
                     byte[] buf = new byte[0x40000];
                     var outputName = Path.GetFileNameWithoutExtension(fileName);
 
-                    Console.WriteLine($"Extracting {outputName} ...");
+                    Logger.Info($"Extracting {outputName}...");
 
                     foreach (MpqEntry entry in archive)
                     {
@@ -104,7 +99,6 @@ namespace AlphaCoreExtractor.MPQ
                                         break;
 
                                     streamOut.Write(buf, 0, cb);
-                                    Program.UpdateLoadingStatus();
                                 }
 
                                 streamOut.Close();
@@ -117,11 +111,10 @@ namespace AlphaCoreExtractor.MPQ
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex.Message);
             }
 
             return false;
-
         }
     }
 }
