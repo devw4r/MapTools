@@ -16,7 +16,7 @@ namespace AlphaCoreExtractor.MPQ
 {
     public static class DBCExtractor
     {
-        private static string OutputPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "dbc");
+        private static string OutputPath = Paths.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "dbc");
         private static List<string> InterestedDBC = new List<string>() { "AreaTable", "Map" };
 
         public static bool ExtractDBC()
@@ -43,7 +43,7 @@ namespace AlphaCoreExtractor.MPQ
                     {
                         if (!string.IsNullOrEmpty(entry.Filename))
                         {
-                            var outputFileName = Path.Combine(OutputPath, Path.GetFileName(entry.Filename));
+                            var outputFileName = Paths.Combine(OutputPath, Path.GetFileName(entry.Filename));
                             var outputPlainName = Path.GetFileNameWithoutExtension(outputFileName);
 
                             if (File.Exists(outputFileName))
