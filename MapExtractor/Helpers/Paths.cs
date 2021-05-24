@@ -90,7 +90,7 @@ namespace AlphaCoreExtractor.Helpers
             var path = Path.Combine(path1, path2);
 
             if (IsLinux)
-                path.Replace(@"\", "/");
+                path = path.Replace(@"\", "/");
 
             return path;
         }
