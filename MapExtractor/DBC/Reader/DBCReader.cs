@@ -7,21 +7,12 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using AlphaCoreExtractor.Log;
+using AlphaCoreExtractor.Helpers;
 
 namespace AlphaCoreExtractor.DBC.Reader
 {
     public static class DBCReader
     {
-        private static string AssemblyDirectory
-        {
-            get
-            {
-                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                string path = Uri.UnescapeDataString(new UriBuilder(codeBase).Path);
-                return Path.GetDirectoryName(path);
-            }
-        }
-
         private static DBCHeader ExtractHeader(BinaryReader dbReader)
         {
             return new DBCHeader
@@ -40,7 +31,7 @@ namespace AlphaCoreExtractor.DBC.Reader
 
             try
             {
-                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(AssemblyDirectory + "/dbc/" + dbcFile))))
+                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(Paths.Combine(Paths.DBCPath, @"\dbc\" + dbcFile)))))
                 {
                     DBCHeader header = ExtractHeader(dbReader);
 
@@ -76,7 +67,7 @@ namespace AlphaCoreExtractor.DBC.Reader
 
             try
             {
-                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(AssemblyDirectory + "/dbc/" + dbcFile))))
+                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(Paths.Combine(Paths.DBCPath, @"\dbc\" + dbcFile)))))
                 {
                     DBCHeader header = ExtractHeader(dbReader);
 
