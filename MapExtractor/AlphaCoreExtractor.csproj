@@ -116,7 +116,7 @@
     <Compile Include="Core\DataChunkHeader.cs" />
     <Compile Include="Helpers\Globals.cs" />
     <Compile Include="Core\MCNREntry.cs" />
-    <Compile Include="Core\MCVT SubChunk.cs" />
+    <Compile Include="Core\MCVTSubChunk.cs" />
     <Compile Include="Core\MTEXChunk.cs" />
     <Compile Include="Helpers\Paths.cs" />
     <Compile Include="Log\Logger.cs" />
@@ -140,7 +140,7 @@
     <Compile Include="Core\SMMapObjDef.cs" />
     <Compile Include="Core\MCNRSubChunk.cs" />
     <Compile Include="Core\SMOHeader.cs" />
-    <Compile Include="Helpers\Tokenss.cs" />
+    <Compile Include="Helpers\Tokens.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
