@@ -17,7 +17,7 @@ namespace AlphaCoreExtractor.MPQ
 {
     public static class WDTExtractor
     {
-        private static string OutputDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "wdt");
+        private static string OutputDirectory = Paths.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "wdt");
         public static bool ExtractWDTFiles(out Dictionary<DBCMap, string> wdtFiles)
         {
             wdtFiles = new Dictionary<DBCMap, string>();
@@ -85,7 +85,8 @@ namespace AlphaCoreExtractor.MPQ
 
                         entry.Filename = outputName;
                         string srcFile = entry.Filename;
-                        outputWdtPath = Path.Combine(OutputDirectory, srcFile);
+
+                        outputWdtPath = Paths.Combine(OutputDirectory, srcFile);
 
                         // Copy to destination file
                         using (Stream streamIn = archive.OpenFile(entry))
