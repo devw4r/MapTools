@@ -29,10 +29,7 @@ namespace AlphaCoreExtractor.Helpers
                 if (!string.IsNullOrEmpty(_cacheDBCLoadPath))
                 {
                     if (!Directory.Exists(_cacheDBCLoadPath))
-                    {
-                        Logger.Info($"Creating directory at: {_cacheDBCLoadPath}");
                         Directory.CreateDirectory(_cacheDBCLoadPath);
-                    }
 
                     return _cacheDBCLoadPath;
                 }
@@ -40,10 +37,7 @@ namespace AlphaCoreExtractor.Helpers
                 _cacheDBCLoadPath = Paths.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"dbc");
 
                 if (!Directory.Exists(_cacheDBCLoadPath))
-                {
-                    Logger.Info($"Creating directory at: {_cacheDBCLoadPath}");
                     Directory.CreateDirectory(_cacheDBCLoadPath);
-                }
 
                 return _cacheDBCLoadPath;
             }
@@ -85,10 +79,7 @@ namespace AlphaCoreExtractor.Helpers
                 if (!string.IsNullOrEmpty(_cacheOutputMapPath))
                 {
                     if (!Directory.Exists(_cacheOutputMapPath))
-                    {
-                        Logger.Info($"Creating directory at: {_cacheOutputMapPath}");
                         Directory.CreateDirectory(_cacheOutputMapPath);
-                    }
 
                     return _cacheOutputMapPath;
                 }
@@ -96,10 +87,7 @@ namespace AlphaCoreExtractor.Helpers
                 _cacheOutputMapPath = Paths.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"maps\");
 
                 if (!Directory.Exists(_cacheOutputMapPath))
-                {
-                    Logger.Info($"Creating directory at: {_cacheOutputMapPath}");
                     Directory.CreateDirectory(_cacheOutputMapPath);
-                }
 
                 return _cacheOutputMapPath;
             }
