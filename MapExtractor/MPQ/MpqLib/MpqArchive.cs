@@ -55,7 +55,6 @@ namespace MpqLib
 		public MpqArchive(string filename)
 		{          
             filename = Paths.Transform(filename);
-            Logger.Info($"Initialized MpqArchive, file [{filename}]");
             BaseStream = File.Open(filename, FileMode.Open, FileAccess.Read);
 			Init();
 		}

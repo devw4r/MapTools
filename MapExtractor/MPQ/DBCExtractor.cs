@@ -48,9 +48,6 @@ namespace AlphaCoreExtractor.MPQ
 
                             if (InterestedDBC.Any(name => outputPlainName.ToLower().Equals(name.ToLower())))
                             {
-                                Logger.Info($"Processing mpq dbc entry [{entry.Filename}].");
-                                Logger.Info($"File {entry.Filename} will be written to {outputFileName}.");
-
                                 byte[] buf = new byte[0x40000];
                                 using (Stream streamIn = archive.OpenFile(entry))
                                 {
