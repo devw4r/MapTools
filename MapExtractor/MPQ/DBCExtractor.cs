@@ -41,6 +41,7 @@ namespace AlphaCoreExtractor.MPQ
                     archive.AddListfileFilenames();
                     foreach (var entry in archive)
                     {
+                        entry.Filename = Paths.Transform(entry.Filename);
                         if (!string.IsNullOrEmpty(entry.Filename))
                         {
                             var outputFileName = Paths.Combine(OutputPath, Path.GetFileName(entry.Filename));
