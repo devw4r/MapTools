@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 
 using MpqLib;
@@ -16,7 +15,6 @@ namespace AlphaCoreExtractor.MPQ
 {
     public static class DBCExtractor
     {
-        private static string OutputPath = Paths.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "dbc");
         private static List<string> InterestedDBC = new List<string>() { "AreaTable", "Map" };
 
         public static bool ExtractDBC()
@@ -25,25 +23,24 @@ namespace AlphaCoreExtractor.MPQ
             {
                 Logger.Notice("Extracting DBC files...");
                 //Check if dbc.MPQ exist.
-                if(!File.Exists(Paths.DBCPath))
+                if(!File.Exists(Paths.DBCMPQPath))
                 {
-                    Logger.Error($"Unable to locate dbc.MPQ at path {Paths.DBCPath}, please check Config.txt and set a proper installation path.");
+                    Logger.Error($"Unable to locate dbc.MPQ at path {Paths.DBCMPQPath}, please check Config.txt and set a proper installation path.");
                     return false;
                 }
 
                 // Clean up output directory if neccesary.
-                if (Directory.Exists(OutputPath))
-                    Directory.Delete(OutputPath, true);
-                Directory.CreateDirectory(OutputPath);
+                if (Directory.Exists(Paths.DBCLoadPath))
+                    Directory.Delete(Paths.DBCLoadPath, true);
 
-                using (MpqArchive archive = new MpqArchive(Paths.DBCPath))
+                using (MpqArchive archive = new MpqArchive(Paths.DBCMPQPath))
                 {
                     archive.AddListfileFilenames();
                     foreach (var entry in archive)
                     {
                         if (!string.IsNullOrEmpty(entry.Filename))
-                        {
-                            var outputFileName = Paths.Combine(OutputPath, Path.GetFileName(entry.Filename));
+                        {                         
+                            var outputFileName = Paths.Combine(Paths.DBCLoadPath, Path.GetFileName(entry.Filename));
                             var outputPlainName = Path.GetFileNameWithoutExtension(outputFileName);
 
                             if (File.Exists(outputFileName))
@@ -51,6 +48,9 @@ namespace AlphaCoreExtractor.MPQ
 
                             if (InterestedDBC.Any(name => outputPlainName.ToLower().Equals(name.ToLower())))
                             {
+                                Logger.Info($"Processing mpq dbc entry [{entry.Filename}].");
+                                Logger.Info($"File {entry.Filename} will be written to {outputFileName}.");
+
                                 byte[] buf = new byte[0x40000];
                                 using (Stream streamIn = archive.OpenFile(entry))
                                 {
@@ -69,7 +69,7 @@ namespace AlphaCoreExtractor.MPQ
                                     }
                                 }
 
-                                Logger.Success($"Extracted DBC file {entry.Filename}");
+                                Logger.Success($"Extracted DBC file [{entry.Filename}].");
                             }
                         }
                     }

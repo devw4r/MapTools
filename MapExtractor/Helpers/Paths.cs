@@ -2,6 +2,7 @@
 // Discord: https://discord.gg/RzBMAKU
 // Github:  https://github.com/The-Alpha-Project
 
+using AlphaCoreExtractor.Log;
 using System;
 using System.IO;
 using System.Linq;
@@ -20,18 +21,48 @@ namespace AlphaCoreExtractor.Helpers
             }
         }
 
-        private static string _cacheDBCPath = string.Empty;
-        public static string DBCPath
+        private static string _cacheDBCLoadPath = string.Empty;
+        public static string DBCLoadPath
         {
             get
             {
-                if (!string.IsNullOrEmpty(_cacheDBCPath))
-                    return _cacheDBCPath;
-                _cacheDBCPath = Paths.Combine(WoWRootPath, @"Data\dbc.MPQ");
+                if (!string.IsNullOrEmpty(_cacheDBCLoadPath))
+                {
+                    if (!Directory.Exists(_cacheDBCLoadPath))
+                    {
+                        Logger.Info($"Creating directory at: {_cacheDBCLoadPath}");
+                        Directory.CreateDirectory(_cacheDBCLoadPath);
+                    }
 
-                return _cacheDBCPath;
+                    return _cacheDBCLoadPath;
+                }
+
+                _cacheDBCLoadPath = Paths.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"dbc");
+
+                if (!Directory.Exists(_cacheDBCLoadPath))
+                {
+                    Logger.Info($"Creating directory at: {_cacheDBCLoadPath}");
+                    Directory.CreateDirectory(_cacheDBCLoadPath);
+                }
+
+                return _cacheDBCLoadPath;
             }
         }
+
+        private static string _cacheDBCMPQPath = string.Empty;
+        public static string DBCMPQPath
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_cacheDBCMPQPath))
+                    return _cacheDBCMPQPath;
+                _cacheDBCMPQPath = Paths.Combine(Paths.Combine(WoWRootPath, "Data"), "dbc.MPQ");
+
+                return _cacheDBCMPQPath;
+            }
+        }
+
+
 
         private static string _cacheInputMapPath = string.Empty;
         public static string InputMapsPath
@@ -54,7 +85,10 @@ namespace AlphaCoreExtractor.Helpers
                 if (!string.IsNullOrEmpty(_cacheOutputMapPath))
                 {
                     if (!Directory.Exists(_cacheOutputMapPath))
+                    {
+                        Logger.Info($"Creating directory at: {_cacheOutputMapPath}");
                         Directory.CreateDirectory(_cacheOutputMapPath);
+                    }
 
                     return _cacheOutputMapPath;
                 }
@@ -62,7 +96,10 @@ namespace AlphaCoreExtractor.Helpers
                 _cacheOutputMapPath = Paths.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"maps\");
 
                 if (!Directory.Exists(_cacheOutputMapPath))
+                {
+                    Logger.Info($"Creating directory at: {_cacheOutputMapPath}");
                     Directory.CreateDirectory(_cacheOutputMapPath);
+                }
 
                 return _cacheOutputMapPath;
             }

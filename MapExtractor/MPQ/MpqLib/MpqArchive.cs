@@ -27,6 +27,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.Log;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -52,8 +53,9 @@ namespace MpqLib
 		}
 
 		public MpqArchive(string filename)
-		{
+		{          
             filename = Paths.Transform(filename);
+            Logger.Info($"Initialized MpqArchive, file [{filename}]");
             BaseStream = File.Open(filename, FileMode.Open, FileAccess.Read);
 			Init();
 		}
@@ -165,7 +167,8 @@ namespace MpqLib
 
         public bool AddListfileFilenames()
         {
-            if (!AddFilename("(listfile)")) return false;
+            if (!AddFilename("(listfile)")) 
+                return false;
 
             using (Stream s = OpenFile("(listfile)"))
                 AddFilenames(s);
@@ -184,10 +187,9 @@ namespace MpqLib
 
         public bool AddFilename(string filename)
         {
-            filename = Paths.Transform(filename);
-
             MpqHash hash;
-            if (!TryGetHashEntry(filename, out hash)) return false;
+            if (!TryGetHashEntry(filename, out hash)) 
+                return false;
 
             _entries[hash.BlockIndex].Filename = filename;
             return true;
@@ -203,8 +205,8 @@ namespace MpqLib
             get 
             {
                 MpqHash hash;
-                filename = Paths.Transform(filename);
-                if (!TryGetHashEntry(filename, out hash)) return null;
+                if (!TryGetHashEntry(filename, out hash)) 
+                    return null;
                 return _entries[hash.BlockIndex];
             }
         }
@@ -221,7 +223,6 @@ namespace MpqLib
 
 		private bool TryGetHashEntry(string filename, out MpqHash hash)
 		{
-            filename = Paths.Transform(filename);
 			uint index = HashString(filename, 0);
 			index  &= _mpqHeader.HashTableSize - 1;
 			uint name1 = HashString(filename, 0x100);
