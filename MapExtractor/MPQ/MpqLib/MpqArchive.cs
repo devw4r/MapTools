@@ -26,6 +26,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+using AlphaCoreExtractor.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -52,7 +53,8 @@ namespace MpqLib
 
 		public MpqArchive(string filename)
 		{
-			BaseStream = File.Open(filename, FileMode.Open, FileAccess.Read);
+            filename = Paths.Transform(filename);
+            BaseStream = File.Open(filename, FileMode.Open, FileAccess.Read);
 			Init();
 		}
 		
@@ -133,7 +135,8 @@ namespace MpqLib
 		
 		public MpqStream OpenFile(string filename)
 		{
-			MpqHash hash;
+            filename = Paths.Transform(filename);
+            MpqHash hash;
 			MpqEntry entry;
 
 			if (!TryGetHashEntry(filename, out hash))
@@ -148,12 +151,14 @@ namespace MpqLib
 
         public MpqStream OpenFile(MpqEntry entry)
         {
+            entry.Filename = Paths.Transform(entry.Filename);
             return new MpqStream(this, entry);
         }
 
 		public bool FileExists(string filename)
 		{
-			MpqHash hash;
+            filename = Paths.Transform(filename);
+            MpqHash hash;
             
             return TryGetHashEntry(filename, out hash);
 		}
@@ -179,6 +184,8 @@ namespace MpqLib
 
         public bool AddFilename(string filename)
         {
+            filename = Paths.Transform(filename);
+
             MpqHash hash;
             if (!TryGetHashEntry(filename, out hash)) return false;
 
@@ -196,6 +203,7 @@ namespace MpqLib
             get 
             {
                 MpqHash hash;
+                filename = Paths.Transform(filename);
                 if (!TryGetHashEntry(filename, out hash)) return null;
                 return _entries[hash.BlockIndex];
             }
@@ -213,6 +221,7 @@ namespace MpqLib
 
 		private bool TryGetHashEntry(string filename, out MpqHash hash)
 		{
+            filename = Paths.Transform(filename);
 			uint index = HashString(filename, 0);
 			index  &= _mpqHeader.HashTableSize - 1;
 			uint name1 = HashString(filename, 0x100);
