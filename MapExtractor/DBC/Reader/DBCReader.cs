@@ -31,7 +31,10 @@ namespace AlphaCoreExtractor.DBC.Reader
 
             try
             {
-                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(Paths.Combine(Paths.DBCPath, @"\dbc\" + dbcFile)))))
+                var filePath = Paths.Combine(Paths.DBCLoadPath, dbcFile);
+                Logger.Info($"DBCReader processing {dbcFile}, path {filePath}");
+
+                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(filePath))))
                 {
                     DBCHeader header = ExtractHeader(dbReader);
 
@@ -67,7 +70,9 @@ namespace AlphaCoreExtractor.DBC.Reader
 
             try
             {
-                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(Paths.Combine(Paths.DBCPath, @"\dbc\" + dbcFile)))))
+                var filePath = Paths.Combine(Paths.DBCLoadPath, dbcFile);
+                Logger.Info($"DBCReader processing {dbcFile}, path {filePath}");
+                using (var dbReader = new BinaryReader(new MemoryStream(File.ReadAllBytes(filePath))))
                 {
                     DBCHeader header = ExtractHeader(dbReader);
 
