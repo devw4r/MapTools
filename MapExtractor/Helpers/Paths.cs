@@ -68,6 +68,14 @@ namespace AlphaCoreExtractor.Helpers
             }
         }
 
+        public static string Transform(string filename)
+        {
+            string outPath = filename;
+            if (IsLinux)
+                outPath = outPath.Replace(@"\", "/");
+            return outPath;
+        }
+
         private static string _cachedWowPath = string.Empty;
         public static string WoWRootPath
         {

@@ -45,7 +45,8 @@ namespace AlphaCoreExtractor.MPQ
                         {
                             if (file.Contains("wdt"))
                             {
-                                if (ExtractWDT(file, out string outputWdtPath))
+                                var filePath = Paths.Combine(dir, Path.GetFileName(file));
+                                if (ExtractWDT(filePath, out string outputWdtPath))
                                     wdtFiles.Add(map, outputWdtPath);
                             }
                         }
