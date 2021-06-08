@@ -13,7 +13,7 @@ namespace AlphaCoreExtractor.Core
     // 0x20:
     // 0x40: not low depth (forced swimming ?)
     // 0x80: fatigue (?, TC: yes)
-    */ 
+    */
 
     public class SLTiles
     {
