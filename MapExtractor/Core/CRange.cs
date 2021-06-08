@@ -8,12 +8,12 @@ namespace AlphaCoreExtractor.Core
 {
     public class CRange
     {
-        public float l;
-        public float h;
+        public float low;
+        public float high;
         public CRange(BinaryReader reader)
         {
-            l = reader.ReadSingle();
-            h = reader.ReadSingle();
+            low = reader.ReadSingle();
+            high = reader.ReadSingle();
         }
     }
 }

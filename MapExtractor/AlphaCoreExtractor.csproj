@@ -112,6 +112,7 @@
     <Compile Include="DBC\Structures\DBCMap.cs" />
     <Compile Include="Generator\MapFilesGenerator.cs" />
     <Compile Include="Helpers\Constants.cs" />
+    <Compile Include="Helpers\Enums.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Core\DataChunkHeader.cs" />
     <Compile Include="Helpers\Globals.cs" />

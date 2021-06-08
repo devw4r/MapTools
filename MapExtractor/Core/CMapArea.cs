@@ -109,7 +109,9 @@ namespace AlphaCoreExtractor.Core
                         if (DataChunkHeader.Token != Tokens.MCNK)
                             throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MCNK]"}");
 
-                        Tiles[x, y] = new SMChunk(reader);
+                        using (MemoryStream ms = new MemoryStream(reader.ReadBytes(DataChunkHeader.Size)))
+                        using (BinaryReader br = new BinaryReader(ms))
+                            Tiles[x, y] = new SMChunk(br);
                     }
                 }
                 return true;
