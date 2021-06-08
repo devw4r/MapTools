@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.Helpers.Enums;
-using AlphaCoreExtractor.Log;
 
 namespace AlphaCoreExtractor.Core
 {
