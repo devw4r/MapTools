@@ -4,13 +4,17 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
+
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.Helpers.Enums;
+using AlphaCoreExtractor.Log;
 
 namespace AlphaCoreExtractor.Core
 {
     public class SMChunk : IDisposable
     {
-        public uint flags;
+        public SMChunkFlags Flags;
         public uint indexX;
         public uint indexY;
         public float radius;
@@ -36,13 +40,15 @@ namespace AlphaCoreExtractor.Core
         public byte[] unused = new byte[24];
         private long HeaderOffsetEnd = 0;
 
+        public bool HasLiquids = false;
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
-        public MCLQSubChunk MCLQSubChunk;
+        public List<MCLQSubChunk> MCLQSubChunk = new List<MCLQSubChunk>();
 
         public SMChunk(BinaryReader reader)
         {
-            flags = reader.ReadUInt32();
+            Flags = (SMChunkFlags)reader.ReadUInt32();
+            HasLiquids = (Flags & SMChunkFlags.HasLiquid) != 0;
             indexX = reader.ReadUInt32();
             indexY = reader.ReadUInt32();
             radius = reader.ReadSingle();
@@ -60,13 +66,13 @@ namespace AlphaCoreExtractor.Core
             nMapObjRefs = reader.ReadUInt32();
             holes_low_res = reader.ReadUInt16();
             padding = reader.ReadUInt16();
-            predTex = reader.ReadBytes(16); //It is used to determine which detail doodads to show.
-            noEffectDoodad = reader.ReadBytes(8);
+            predTex = reader.ReadBytes(16); //It is used to determine which detail doodads to show. 2 bit 8*8 arr unsigned integers naming the layer.
+            noEffectDoodad = reader.ReadBytes(8); // 1 bit 8*8 arr, doodads disabled if 1
             offsSndEmitters = reader.ReadUInt32(); // MCSE
             nSndEmitters = reader.ReadUInt32();
             offsLiquid = reader.ReadUInt32(); // MCLQ
 
-            unused = reader.ReadBytes(24);
+            unused = reader.ReadBytes(24); //Padding
 
             HeaderOffsetEnd = reader.BaseStream.Position;
 
@@ -92,7 +98,7 @@ namespace AlphaCoreExtractor.Core
             if (offsSndEmitters > 0)
                 BuildMCSE(reader, offsSndEmitters, (int)nSndEmitters);
 
-            if (offsLiquid > 0)
+            if (offsLiquid > 0 && HasLiquids)
                 BuildSubMCLQ(reader, offsLiquid);
         }
 
@@ -103,9 +109,10 @@ namespace AlphaCoreExtractor.Core
             if (reader.IsEOF())
                 return;
 
-            var dataHeader = new DataChunkHeader(reader);
-            if (dataHeader.Token == Tokens.MODF)
-                MCLQSubChunk = new MCLQSubChunk(reader);
+            // In the alpha clients there is no size indicator at all. The optimal way of parsing this chunk is to (sequentially) validate what LQ_* flags are set,
+            // if any, and read accordingly - this will also provide the liquid type and therefore what SLVert to use.
+            foreach (SMChunkFlags flag in Flags.GetMCNKFlags())
+                MCLQSubChunk.Add(new MCLQSubChunk(reader, flag));
         }
 
         private void BuildSubMCNR(BinaryReader reader, uint offset)
