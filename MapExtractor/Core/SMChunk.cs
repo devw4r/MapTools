@@ -42,6 +42,8 @@ namespace AlphaCoreExtractor.Core
         public bool HasLiquids = false;
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
+        public MCSHSubChunk MCSHSubChunk;
+        public MCSESubChunk MCSESubChunk;
         public List<MCLQSubChunk> MCLQSubChunk = new List<MCLQSubChunk>();
 
         public SMChunk(BinaryReader reader)
@@ -135,9 +137,6 @@ namespace AlphaCoreExtractor.Core
             MCVTSubChunk = new MCVTSubChunk(reader);
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
         private void BuildMCSE(BinaryReader reader, uint offset, int count)
         {
             reader.SetPosition(offset + HeaderOffsetEnd);
@@ -145,18 +144,18 @@ namespace AlphaCoreExtractor.Core
             if (reader.IsEOF())
                 return;
 
-            reader.ReadBytes(76 * count); //size of struct CWSoundEmitter
+            MCSESubChunk = new MCSESubChunk(reader);
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
+
         private void BuildMCSH(BinaryReader reader, uint offset, int size)
         {
             reader.SetPosition(offset + HeaderOffsetEnd);
 
             if (reader.IsEOF())
                 return;
+
+            MCSHSubChunk = new MCSHSubChunk(reader);
         }
 
         /// <summary>
