@@ -11,18 +11,18 @@ namespace AlphaCoreExtractor.Core
     {
         int CurrentBit;
         byte CurrentByte;
-        Stream BaseStream;
-        public BitReader(Stream stream)
-        { 
-            BaseStream = stream;
-            CurrentByte = (byte)stream.ReadByte();
+        BinaryReader Reader;
+        public BitReader(BinaryReader reader)
+        {
+            Reader = reader;
+            CurrentByte = (byte)Reader.ReadByte();
         }
 
         public bool ReadBit(bool BE = false)
         {
             if (CurrentBit == 8)
             {
-                var _byte = BaseStream.ReadByte();
+                var _byte = Reader.ReadByte();
                 CurrentBit = 0;
                 CurrentByte = (byte)_byte;
             }
@@ -39,7 +39,7 @@ namespace AlphaCoreExtractor.Core
 
         public void Dispose()
         {
-            BaseStream = null;
+            Reader = null;
         }
     }
 }
