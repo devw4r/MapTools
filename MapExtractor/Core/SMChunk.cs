@@ -208,7 +208,10 @@ namespace AlphaCoreExtractor.Core
         {
             MCNRSubChunk = null;
             MCVTSubChunk = null;
+            MCLQSubChunks.Clear();
             MCLQSubChunks = null;
+            MCSESubChunsk.Clear();
+            MCSESubChunsk = null;
         }
     }
 }
