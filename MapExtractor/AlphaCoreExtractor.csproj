@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\BinaryReaderProgress.cs" />
+    <Compile Include="Core\BitReader.cs" />
     <Compile Include="Core\C3MCNRVector.cs" />
     <Compile Include="Core\C3Vector.cs" />
     <Compile Include="Core\C4Vector.cs" />
@@ -96,7 +97,9 @@
     <Compile Include="Core\CMapArea.cs" />
     <Compile Include="Core\CMapObj.cs" />
     <Compile Include="Core\CRange.cs" />
+    <Compile Include="Core\MCSESubChunk.cs" />
     <Compile Include="Core\MCLQSubChunk.cs" />
+    <Compile Include="Core\MCSHSubChunk.cs" />
     <Compile Include="Core\SLTiles.cs" />
     <Compile Include="Core\SLVert.cs" />
     <Compile Include="Core\SMVert.cs" />

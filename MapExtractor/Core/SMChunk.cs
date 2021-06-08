@@ -42,7 +42,9 @@ namespace AlphaCoreExtractor.Core
         public bool HasLiquids = false;
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
-        public List<MCLQSubChunk> MCLQSubChunk = new List<MCLQSubChunk>();
+        public MCSHSubChunk MCSHSubChunk;
+        public List<MCSESubChunk> MCSESubChunsk = new List<MCSESubChunk>();
+        public List<MCLQSubChunk> MCLQSubChunks = new List<MCLQSubChunk>();
 
         public SMChunk(BinaryReader reader)
         {
@@ -111,7 +113,7 @@ namespace AlphaCoreExtractor.Core
             // In the alpha clients there is no size indicator at all. The optimal way of parsing this chunk is to (sequentially) validate what LQ_* flags are set,
             // if any, and read accordingly - this will also provide the liquid type and therefore what SLVert to use.
             foreach (SMChunkFlags flag in Flags.GetMCNKFlags())
-                MCLQSubChunk.Add(new MCLQSubChunk(reader, flag));
+                MCLQSubChunks.Add(new MCLQSubChunk(reader, flag));
         }
 
         private void BuildSubMCNR(BinaryReader reader, uint offset)
@@ -135,9 +137,6 @@ namespace AlphaCoreExtractor.Core
             MCVTSubChunk = new MCVTSubChunk(reader);
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
         private void BuildMCSE(BinaryReader reader, uint offset, int count)
         {
             reader.SetPosition(offset + HeaderOffsetEnd);
@@ -145,18 +144,19 @@ namespace AlphaCoreExtractor.Core
             if (reader.IsEOF())
                 return;
 
-            reader.ReadBytes(76 * count); //size of struct CWSoundEmitter
+            for(int i = 0; i < count; i++)
+                MCSESubChunsk.Add(new MCSESubChunk(reader));
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
+
         private void BuildMCSH(BinaryReader reader, uint offset, int size)
         {
             reader.SetPosition(offset + HeaderOffsetEnd);
 
             if (reader.IsEOF())
                 return;
+
+            MCSHSubChunk = new MCSHSubChunk(reader);
         }
 
         /// <summary>
@@ -208,7 +208,10 @@ namespace AlphaCoreExtractor.Core
         {
             MCNRSubChunk = null;
             MCVTSubChunk = null;
-            MCLQSubChunk = null;
+            MCLQSubChunks.Clear();
+            MCLQSubChunks = null;
+            MCSESubChunsk.Clear();
+            MCSESubChunsk = null;
         }
     }
 }
