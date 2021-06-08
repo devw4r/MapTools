@@ -30,7 +30,7 @@ namespace AlphaCoreExtractor.Core
                 case SMChunkFlags.FLAG_LQ_MAGMA:
                     for (int i = 0; i < 9; i++)
                         for (int j = 0; j < 9; j++)
-                            Verts[i, j] = new SMVert(reader); // MAgma Vert
+                            Verts[i, j] = new SMVert(reader); // Magma Vert
                     break;
                 default:
                     for (int i = 0; i < 9; i++)
