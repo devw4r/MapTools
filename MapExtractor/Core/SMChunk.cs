@@ -43,8 +43,8 @@ namespace AlphaCoreExtractor.Core
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
         public MCSHSubChunk MCSHSubChunk;
-        public MCSESubChunk MCSESubChunk;
-        public List<MCLQSubChunk> MCLQSubChunk = new List<MCLQSubChunk>();
+        public List<MCSESubChunk> MCSESubChunsk = new List<MCSESubChunk>();
+        public List<MCLQSubChunk> MCLQSubChunks = new List<MCLQSubChunk>();
 
         public SMChunk(BinaryReader reader)
         {
@@ -113,7 +113,7 @@ namespace AlphaCoreExtractor.Core
             // In the alpha clients there is no size indicator at all. The optimal way of parsing this chunk is to (sequentially) validate what LQ_* flags are set,
             // if any, and read accordingly - this will also provide the liquid type and therefore what SLVert to use.
             foreach (SMChunkFlags flag in Flags.GetMCNKFlags())
-                MCLQSubChunk.Add(new MCLQSubChunk(reader, flag));
+                MCLQSubChunks.Add(new MCLQSubChunk(reader, flag));
         }
 
         private void BuildSubMCNR(BinaryReader reader, uint offset)
@@ -144,7 +144,8 @@ namespace AlphaCoreExtractor.Core
             if (reader.IsEOF())
                 return;
 
-            MCSESubChunk = new MCSESubChunk(reader);
+            for(int i = 0; i < count; i++)
+                MCSESubChunsk.Add(new MCSESubChunk(reader));
         }
 
 
@@ -207,7 +208,7 @@ namespace AlphaCoreExtractor.Core
         {
             MCNRSubChunk = null;
             MCVTSubChunk = null;
-            MCLQSubChunk = null;
+            MCLQSubChunks = null;
         }
     }
 }
