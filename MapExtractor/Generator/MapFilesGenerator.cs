@@ -5,11 +5,12 @@
 using System;
 using System.IO;
 using System.Text;
+
+using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.DBC.Structures;
-using AlphaCoreExtractor.DBC;
 
 namespace AlphaCoreExtractor.Generator
 {
