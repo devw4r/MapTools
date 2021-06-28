@@ -26,8 +26,8 @@ namespace AlphaCoreExtractor.DBC.Structures
                 throw new Exception("Invalid area ID's.");
 
             this.ID = areaTableAlpha.ID;
-
             this.Name = areaTableAlpha.AreaName_enUS;
+            this.MapID = areaTableAlpha.ContinentID;
             this.AreaNumber = areaTableAlpha.AreaNumber;
             this.ParentAreaNum = areaTableAlpha.ParentAreaNum;
             this.Area_Flags = areaTableVanilla.Flags;
