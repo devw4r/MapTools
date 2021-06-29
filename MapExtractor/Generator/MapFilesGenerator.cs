@@ -72,11 +72,11 @@ namespace AlphaCoreExtractor.Generator
                             {
                                 using (BinaryWriter bw = new BinaryWriter(fs))
                                 {                                 
-                                    for (int i = 0; i < Constants.TileSize; i++)
+                                    for (int cy = 0; cy < Constants.TileSize; cy++)
                                     {
-                                        for (int j = 0; j < Constants.TileSize; j++)
+                                        for (int cx = 0; cx < Constants.TileSize; cx++)
                                         {
-                                            var cell = tileBlock.Tiles[i, j];
+                                            var cell = tileBlock.Tiles[cy, cx];
                                             var areaNumber = cell.areaNumber;
 
                                             if(areaNumber > 4000000000)
