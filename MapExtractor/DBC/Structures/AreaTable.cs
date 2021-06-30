@@ -18,7 +18,7 @@ namespace AlphaCoreExtractor.DBC.Structures
         public uint Area_Level { get; private set; }
         public uint FactionGroupMask { get; private set; }
         public uint LiquidTypeID { get; private set; }
-        public uint MinElevation { get; set; }
+        public float MinElevation { get; set; }
 
         public AreaTable(AreaTable_Alpha areaTableAlpha, AreaTable_Vanilla areaTableVanilla, uint explore_bit)
         {
