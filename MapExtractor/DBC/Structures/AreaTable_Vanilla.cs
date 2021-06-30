@@ -28,7 +28,7 @@ namespace AlphaCoreExtractor.DBC.Structures
         public uint AreaName_Mask;
         public uint FactionGroupMask;
         public uint LiquidTypeID;
-        public uint MinElevation;
+        public float MinElevation;
         public uint AmbientMultiplier;
         public uint LightID;
     }
