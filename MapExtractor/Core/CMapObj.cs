@@ -139,7 +139,7 @@ namespace AlphaCoreExtractor.Core
                 Logger.Info($"MapObjectsNames (.wmo): {MapObjectsNames.Count}");
                 Logger.Info($"Usable Tiles: {UsableTiles}");
                 Logger.Info($"UnUsable Tiles: {UnUsableTiles}");
-                PrintTileBlockInformation();
+                PrintTileBlockInformation(DBCMap.ID);
             }
 
             Logger.Success("Map information loaded successfully.");
@@ -354,7 +354,7 @@ namespace AlphaCoreExtractor.Core
             return false;
         }
 
-        public void PrintTileBlockInformation()
+        public void PrintTileBlockInformation(uint mapID)
         {
             for (int x = 0; x < Constants.TileBlockSize; x++)
             {
@@ -363,7 +363,7 @@ namespace AlphaCoreExtractor.Core
                     if (TileBlocks[x, y] != null)
                     {
                         Logger.Notice($"Tile: {Name}_{x}_{y}");
-                        foreach (var areaName in TileBlocks[x, y].GetAreaNames())
+                        foreach (var areaName in TileBlocks[x, y].GetAreaNames(mapID))
                             Logger.Info($" {areaName}");
                     }
                 }
