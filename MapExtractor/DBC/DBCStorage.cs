@@ -54,7 +54,7 @@ namespace AlphaCoreExtractor.DBC
                     if (!MappedAreaTables.ContainsKey(alpha[entry.Key].ContinentID))
                         MappedAreaTables.Add(alpha[entry.Key].ContinentID, new Dictionary<uint, AreaTable>());
 
-                    if (!MappedAreaTables[alpha[entry.Key].ContinentID].ContainsKey(alpha[entry.Key].ID))
+                    if (!MappedAreaTables[alpha[entry.Key].ContinentID].ContainsKey(alpha[entry.Key].AreaNumber))
                         MappedAreaTables[alpha[entry.Key].ContinentID].Add(alpha[entry.Key].AreaNumber, AreaTable[entry.Value.ID]);
                 }
             }
