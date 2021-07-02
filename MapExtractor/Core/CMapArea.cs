@@ -226,7 +226,7 @@ namespace AlphaCoreExtractor.Core
         }
 
         #region #Helpers
-        public IEnumerable<string> GetAreaNames()
+        public IEnumerable<string> GetAreaNames(uint mapID)
         {
             HashSet<uint> areas = new HashSet<uint>();
 
@@ -237,7 +237,7 @@ namespace AlphaCoreExtractor.Core
                     var areaID = Tiles[x, y].areaNumber;
                     if (!areas.Contains(areaID))
                     {
-                        if (DBCStorage.TryGetAreaByAreaNumber(areaID, out AreaTable areaTable))
+                        if (DBCStorage.TryGetAreaByMapIdAndAreaNumber(mapID, areaID, out AreaTable areaTable))
                             yield return areaTable.Name;
                         else
                             yield return $"Unknown area {areaID}";

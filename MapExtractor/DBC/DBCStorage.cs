@@ -17,6 +17,7 @@ namespace AlphaCoreExtractor.DBC
     public static class DBCStorage
     {
         private static Dictionary<uint, AreaTable> AreaTable = new Dictionary<uint, AreaTable>();
+        private static Dictionary<uint, Dictionary<uint, AreaTable>> MappedAreaTables = new Dictionary<uint, Dictionary<uint, AreaTable>>();
         private static ConcurrentDictionary<uint, DBCMap> Maps;
 
         public static bool Initialize()
@@ -45,8 +46,18 @@ namespace AlphaCoreExtractor.DBC
         {
             uint explore_bit = 0;
             foreach (var entry in alpha)
+            {
                 if (vanilla.ContainsKey(entry.Key))
+                {
                     AreaTable.Add(entry.Value.ID, new AreaTable(alpha[entry.Key], vanilla[entry.Key], explore_bit++));
+
+                    if (!MappedAreaTables.ContainsKey(alpha[entry.Key].ContinentID))
+                        MappedAreaTables.Add(alpha[entry.Key].ContinentID, new Dictionary<uint, AreaTable>());
+
+                    if (!MappedAreaTables[alpha[entry.Key].ContinentID].ContainsKey(alpha[entry.Key].AreaNumber))
+                        MappedAreaTables[alpha[entry.Key].ContinentID].Add(alpha[entry.Key].AreaNumber, AreaTable[entry.Value.ID]);
+                }
+            }
         }
 
         public static Dictionary<uint, DBCMap> GetMaps()
@@ -70,34 +81,14 @@ namespace AlphaCoreExtractor.DBC
             return false;
         }
 
-        public static bool TryGetMapByID(uint id, out DBCMap map)
-        {
-            if (Maps.TryGetValue(id, out map))
-                return true;
-            return false;
-        }
-
-        public static bool TryGetAreaByID(uint id, out AreaTable areaTable)
-        {
-            if (AreaTable.TryGetValue(id, out areaTable))
-                return true;
-            return false;
-        }
-
-        public static bool TryGetAreaByAreaNumber(uint areaNumber, out AreaTable areaTable)
+        public static bool TryGetAreaByMapIdAndAreaNumber(uint mapID, uint areaNumber, out AreaTable areaTable)
         {
             areaTable = null;
-            try
-            {
-                areaTable = AreaTable.Values.First(v => v.AreaNumber == areaNumber);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex.Message);
-            }
 
-            return false;
+            if(MappedAreaTables.ContainsKey(mapID) && MappedAreaTables[mapID].ContainsKey(areaNumber))
+                areaTable = MappedAreaTables[mapID][areaNumber];
+
+            return areaTable != null;
         }
 
         public static bool TryGetAreaByParentAreaNumber(uint areaNumber, out AreaTable areaTable)
