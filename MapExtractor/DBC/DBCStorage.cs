@@ -100,6 +100,22 @@ namespace AlphaCoreExtractor.DBC
             return false;
         }
 
+        public static bool TryGetAreaByMapIdAndAreaNumber(uint mapID, uint areaNumber, out AreaTable areaTable)
+        {
+            areaTable = null;
+            try
+            {
+                areaTable = AreaTable.Values.First(v => v.AreaNumber == areaNumber && v.MapID == mapID);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.Message);
+            }
+
+            return false;
+        }
+
         public static bool TryGetAreaByParentAreaNumber(uint areaNumber, out AreaTable areaTable)
         {
             areaTable = null;

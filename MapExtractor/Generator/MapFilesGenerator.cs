@@ -11,6 +11,7 @@ using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.DBC.Structures;
+using System.Collections.Generic;
 
 namespace AlphaCoreExtractor.Generator
 {
@@ -71,7 +72,7 @@ namespace AlphaCoreExtractor.Generator
                             using (FileStream fs = new FileStream(outputFileName, FileMode.Append))
                             {
                                 using (BinaryWriter bw = new BinaryWriter(fs))
-                                {                                 
+                                {
                                     for (int cy = 0; cy < Constants.TileSize; cy++)
                                     {
                                         for (int cx = 0; cx < Constants.TileSize; cx++)
@@ -79,32 +80,21 @@ namespace AlphaCoreExtractor.Generator
                                             var cell = tileBlock.Tiles[cy, cx];
                                             var areaNumber = cell.areaNumber;
 
-                                            if(areaNumber > 4000000000)
-                                            {
-                                                bw.Write((uint)0xFF);
-                                                bw.Write((byte)0xFF);
-                                                bw.Write((byte)0xFF);
-                                                bw.Write((ushort)0xFF);
-                                                bw.Write((byte)0xFF);
-                                                continue;
-                                            }
-
-                                            if (DBCStorage.TryGetAreaByAreaNumber(areaNumber, out AreaTable areaTable))
-                                            {
-                                                bw.Write((uint)areaTable.AreaNumber);
-                                                bw.Write((byte)areaTable.Area_Flags);
-                                                bw.Write((byte)areaTable.Area_Level);
-                                                bw.Write((ushort)areaTable.Exploration_Bit);
-                                                bw.Write((byte)areaTable.FactionGroupMask);
-                                            }
+                                            if (CachedNonExistent.ContainsKey(map.DBCMap.ID) && CachedNonExistent[map.DBCMap.ID].Contains(areaNumber))
+                                                WriteNullArea(bw, map.DBCMap.ID, areaNumber);
                                             else
                                             {
-                                                Logger.Warning($"Unable to locate AreaNumber {areaNumber}");
-                                                bw.Write((uint)0xFF);
-                                                bw.Write((byte)0xFF);
-                                                bw.Write((byte)0xFF);
-                                                bw.Write((ushort)0xFF);
-                                                bw.Write((byte)0xFF);
+                                                if (map.DBCMap.ID < 2 && areaNumber < 4000000000 && DBCStorage.TryGetAreaByMapIdAndAreaNumber(map.DBCMap.ID, areaNumber, out AreaTable areaTable))
+                                                {
+                                                    bw.Write((uint)areaTable.ID);
+                                                    bw.Write((uint)areaTable.AreaNumber);
+                                                    bw.Write((byte)areaTable.Area_Flags);
+                                                    bw.Write((byte)areaTable.Area_Level);
+                                                    bw.Write((ushort)areaTable.Exploration_Bit);
+                                                    bw.Write((byte)areaTable.FactionGroupMask);
+                                                }
+                                                else
+                                                    WriteNullArea(bw, map.DBCMap.ID, areaNumber);
                                             }
                                         }
                                     }
@@ -126,6 +116,26 @@ namespace AlphaCoreExtractor.Generator
             }
 
             return false;
+        }
+
+        private static Dictionary<uint, HashSet<uint>> CachedNonExistent = new Dictionary<uint, HashSet<uint>>();
+        private static void WriteNullArea(BinaryWriter bw, uint mapid, uint areaNumber)
+        {
+            if (!CachedNonExistent.ContainsKey(mapid))
+                CachedNonExistent.Add(mapid, new HashSet<uint>());
+
+            if (!CachedNonExistent[mapid].Contains(areaNumber))
+            {
+                Logger.Warning($"Unable to locate AreaNumber {areaNumber} information for Map {mapid}");
+                CachedNonExistent[mapid].Add(areaNumber);
+            }
+
+            bw.Write((uint)0xFF); // ZoneId
+            bw.Write((uint)0xFF); // AreaNumber
+            bw.Write((byte)0xFF); // AreaFlags
+            bw.Write((byte)0xFF); // AreaLevel
+            bw.Write((ushort)0xFF); // ExploreBit
+            bw.Write((byte)0xFF); // FactionMask (Team)
         }
 
         private static Cell TransformHeightData(CMapArea tileBlock)
