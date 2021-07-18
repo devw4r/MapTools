@@ -12,6 +12,7 @@ using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.DBC.Structures;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AlphaCoreExtractor.Generator
 {
@@ -96,6 +97,78 @@ namespace AlphaCoreExtractor.Generator
                                                 else
                                                     WriteNullArea(bw, map.DBCMap.ID, areaNumber);
                                             }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                // Liquids
+                for (int tileBlockX = 0; tileBlockX < Constants.TileBlockSize; tileBlockX++)
+                {
+                    for (int tileBlockY = 0; tileBlockY < Constants.TileBlockSize; tileBlockY++)
+                    {
+                        var tileBlock = map.TileBlocks[tileBlockX, tileBlockY];
+                        if (tileBlock != null)
+                        {                         
+                            bool[,] liquid_show = new bool[Constants.GridSize, Constants.GridSize];
+                            float[,] liquid_height = new float[Constants.GridSize + 1, Constants.GridSize + 1];
+                            byte[,] liquid_flag = new byte[Constants.GridSize + 1, Constants.GridSize + 1];
+
+                            var mapID = map.DBCMap.ID.ToString("000");
+                            var blockX = tileBlockX.ToString("00");
+                            var blockY = tileBlockY.ToString("00");
+                            var outputFileName = $@"{Paths.OutputMapsPath}{mapID}{blockX}{blockY}.map";
+
+                            using (FileStream fs = new FileStream(outputFileName, FileMode.Append))
+                            {
+                                using (BinaryWriter bw = new BinaryWriter(fs))
+                                {
+                                    for (int i = 0; i < Constants.TileSize; i++)
+                                    {
+                                        for (int j = 0; j < Constants.TileSize; j++)
+                                        {
+                                            var cell = tileBlock.Tiles[i, j];
+
+                                            if (cell == null || cell.MCLQSubChunks.Count == 0 || !cell.MCLQSubChunks.Any(v => v.HasHeight))
+                                                continue;
+
+                                            var liquid = cell.MCLQSubChunks.First(v => v.HasHeight);
+
+                                            for (int y = 0; y < Constants.Cell_Size; y++)
+                                            {
+                                                int cy = i * Constants.Cell_Size + y;
+                                                for (int x = 0; x < Constants.Cell_Size; x++)
+                                                {
+                                                    int cx = j * Constants.Cell_Size + x;
+                                                    // Check if this liquid is rendered by the client.
+                                                    if (liquid.Flags[y, x] != 0x0F)
+                                                        liquid_show[cy,cx] = true;
+                                                }
+                                            }
+
+                                            for (int y = 0; y <= Constants.Cell_Size; y++)
+                                            {
+                                                int cy = i * Constants.Cell_Size + y;
+                                                for (int x = 0; x <= Constants.Cell_Size; x++)
+                                                {
+                                                    int cx = j * Constants.Cell_Size + x;
+                                                    liquid_height[cy, cx] = liquid.GetHeight(y, x);
+                                                    liquid_flag[cy, cx] = (byte)liquid.Flag;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    for (int y = 0; y < Constants.GridSize; y++)
+                                    {
+                                        for (int x = 0; x < Constants.GridSize; x++)
+                                        {
+                                            bw.Write(liquid_flag[y, x]);
+                                            bw.Write(liquid_height[y, x]);
                                         }
                                     }
                                 }

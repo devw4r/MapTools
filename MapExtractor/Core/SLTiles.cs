@@ -6,15 +6,12 @@ using System.IO;
 
 namespace AlphaCoreExtractor.Core
 {
-    /* char tiles[8][8];
-    // 0x0f or 0x8 mean don't render (?, TC: 0xF)
-    // &0xf: liquid type (1: ocean, 3: slime, 4: river, 6: magma)
-    // 0x10:
-    // 0x20:
-    // 0x40: not low depth (forced swimming ?)
-    // 0x80: fatigue (?, TC: yes)
-    */
-
+    // 1<<0 - ocean
+    // 1<<1 - lava/slime
+    // 1<<2 - water
+    // 1<<6 - all water
+    // 1<<7 - dark water
+    // == 0x0F - not show liquid
     public class SLTiles
     {
         public byte[,] Tiles = new byte[8, 8];
