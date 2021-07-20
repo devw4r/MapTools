@@ -4,15 +4,16 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 
 using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.Helpers.Enums;
 using AlphaCoreExtractor.DBC.Structures;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AlphaCoreExtractor.Generator
 {
@@ -113,7 +114,7 @@ namespace AlphaCoreExtractor.Generator
                     {
                         var tileBlock = map.TileBlocks[tileBlockX, tileBlockY];
                         if (tileBlock != null)
-                        {                         
+                        {
                             bool[,] liquid_show = new bool[Constants.GridSize, Constants.GridSize];
                             float[,] liquid_height = new float[Constants.GridSize + 1, Constants.GridSize + 1];
                             byte[,] liquid_flag = new byte[Constants.GridSize + 1, Constants.GridSize + 1];
@@ -133,10 +134,15 @@ namespace AlphaCoreExtractor.Generator
                                         {
                                             var cell = tileBlock.Tiles[i, j];
 
-                                            if (cell == null || cell.MCLQSubChunks.Count == 0 || !cell.MCLQSubChunks.Any(v => v.HasHeight))
+                                            if (cell == null || cell.MCLQSubChunks.Count == 0)
                                                 continue;
 
-                                            var liquid = cell.MCLQSubChunks.First(v => v.HasHeight);
+                                            MCLQSubChunk liquid;
+                                            if (cell.MCLQSubChunks.Count > 1)
+                                                liquid = cell.MCLQSubChunks.First(mc => mc.Flag != SMChunkFlags.FLAG_LQ_OCEAN);
+                                            else
+                                                liquid = cell.MCLQSubChunks.First();
+
 
                                             for (int y = 0; y < Constants.Cell_Size; y++)
                                             {
@@ -146,7 +152,13 @@ namespace AlphaCoreExtractor.Generator
                                                     int cx = j * Constants.Cell_Size + x;
                                                     // Check if this liquid is rendered by the client.
                                                     if (liquid.Flags[y, x] != 0x0F)
-                                                        liquid_show[cy,cx] = true;
+                                                    {
+                                                        liquid_show[cy, cx] = true;
+
+                                                        // Overwrite DEEP water flag.
+                                                        if ((liquid.Flags[y, x] & (1 << 7)) != 0)
+                                                            liquid.Flag = SMChunkFlags.FLAG_LQ_DEEP;
+                                                    }
                                                 }
                                             }
 

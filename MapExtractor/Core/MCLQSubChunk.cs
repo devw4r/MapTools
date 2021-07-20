@@ -36,6 +36,7 @@ namespace AlphaCoreExtractor.Core
             switch (flag)
             {
                 case SMChunkFlags.FLAG_LQ_OCEAN:
+                    HasHeight = true;
                     for (int i = 0; i < 9; i++)
                         for (int j = 0; j < 9; j++)
                             Verts[i, j] = new SOVert(reader); // Ocean Vert
