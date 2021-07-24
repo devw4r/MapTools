@@ -16,7 +16,6 @@ namespace AlphaCoreExtractor.Core
         public uint NFlowVS;
         List<SWFlowv> Flowvs = new List<SWFlowv>(); // 2
         public SMChunkFlags Flag = SMChunkFlags.NONE;
-        public bool HasHeight;
 
         public float GetHeight(int y, int x)
         {
@@ -36,19 +35,16 @@ namespace AlphaCoreExtractor.Core
             switch (flag)
             {
                 case SMChunkFlags.FLAG_LQ_OCEAN:
-                    HasHeight = true;
                     for (int i = 0; i < 9; i++)
                         for (int j = 0; j < 9; j++)
                             Verts[i, j] = new SOVert(reader); // Ocean Vert
                     break;
                 case SMChunkFlags.FLAG_LQ_MAGMA:
-                    HasHeight = true;
                     for (int i = 0; i < 9; i++)
                         for (int j = 0; j < 9; j++)
                             Verts[i, j] = new SMVert(reader); // Magma Vert
                     break;
                 default:
-                    HasHeight = true;
                     for (int i = 0; i < 9; i++)
                         for (int j = 0; j < 9; j++)
                             Verts[i, j] = new SWVert(reader); // Water Vert
