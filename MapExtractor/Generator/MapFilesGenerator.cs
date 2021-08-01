@@ -83,12 +83,14 @@ namespace AlphaCoreExtractor.Generator
                                             var areaNumber = cell.areaNumber;
 
                                             if (CachedNonExistent.ContainsKey(map.DBCMap.ID) && CachedNonExistent[map.DBCMap.ID].Contains(areaNumber))
+                                            {
                                                 WriteNullArea(bw, map.DBCMap.ID, areaNumber);
+                                            }
                                             else
                                             {
                                                 if (map.DBCMap.ID < 2 && areaNumber < 4000000000 && DBCStorage.TryGetAreaByMapIdAndAreaNumber(map.DBCMap.ID, areaNumber, out AreaTable areaTable))
                                                 {
-                                                    bw.Write((uint)areaTable.ID);
+                                                    bw.Write((int)areaTable.ID);
                                                     bw.Write((uint)areaTable.AreaNumber);
                                                     bw.Write((byte)areaTable.Area_Flags);
                                                     bw.Write((byte)areaTable.Area_Level);
@@ -117,7 +119,7 @@ namespace AlphaCoreExtractor.Generator
                         {
                             bool[,] liquid_show = new bool[Constants.GridSize, Constants.GridSize];
                             float[,] liquid_height = new float[Constants.GridSize + 1, Constants.GridSize + 1];
-                            byte[,] liquid_flag = new byte[Constants.GridSize + 1, Constants.GridSize + 1];
+                            sbyte[,] liquid_flag = new sbyte[Constants.GridSize + 1, Constants.GridSize + 1];
 
                             var mapID = map.DBCMap.ID.ToString("000");
                             var blockX = tileBlockX.ToString("00");
@@ -169,7 +171,7 @@ namespace AlphaCoreExtractor.Generator
                                                 {
                                                     int cx = j * Constants.Cell_Size + x;
                                                     liquid_height[cy, cx] = liquid.GetHeight(y, x);
-                                                    liquid_flag[cy, cx] = (byte)liquid.Flag;
+                                                    liquid_flag[cy, cx] = (sbyte)liquid.Flag;
                                                 }
                                             }
                                         }
@@ -179,8 +181,13 @@ namespace AlphaCoreExtractor.Generator
                                     {
                                         for (int x = 0; x < Constants.GridSize; x++)
                                         {
-                                            bw.Write(liquid_flag[y, x]);
-                                            bw.Write(liquid_height[y, x]);
+                                            if (liquid_show[y, x])
+                                            {
+                                                bw.Write(liquid_flag[y, x]);
+                                                bw.Write(liquid_height[y, x]);
+                                            }
+                                            else
+                                                bw.Write((sbyte)-1);
                                         }
                                     }
                                 }
@@ -215,12 +222,7 @@ namespace AlphaCoreExtractor.Generator
                 CachedNonExistent[mapid].Add(areaNumber);
             }
 
-            bw.Write((uint)0xFF); // ZoneId
-            bw.Write((uint)0xFF); // AreaNumber
-            bw.Write((byte)0xFF); // AreaFlags
-            bw.Write((byte)0xFF); // AreaLevel
-            bw.Write((ushort)0xFF); // ExploreBit
-            bw.Write((byte)0xFF); // FactionMask (Team)
+            bw.Write((int)-1); // ZoneId
         }
 
         private static Cell TransformHeightData(CMapArea tileBlock)
