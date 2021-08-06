@@ -115,6 +115,7 @@
     <Compile Include="DBC\Structures\AreaTable_Alpha.cs" />
     <Compile Include="DBC\Structures\AreaTable_Vanilla.cs" />
     <Compile Include="DBC\Structures\DBCMap.cs" />
+    <Compile Include="Generator\Extensions.cs" />
     <Compile Include="Generator\MapFilesGenerator.cs" />
     <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\Enums.cs" />

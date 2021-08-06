@@ -10,7 +10,7 @@ namespace AlphaCoreExtractor.Log
     {
         public static void Info(string message)
         {
-            Console.WriteLine($"{"[INFO]"} {message}");
+            Console.WriteLine($"{"[INFORMATION]"} {message}");
         }
 
         public static void Notice(string message)

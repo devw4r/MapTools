@@ -81,12 +81,14 @@ namespace AlphaCoreExtractor
                 // Flush .map files output dir.
                 Directory.Delete(Paths.OutputMapsPath, true);
 
+                int GeneratedMapFiles = 0;
                 //Begin parsing adt files and generate .map files.
                 foreach (var entry in WDTFiles)
                 {
                     using (CMapObj map = new CMapObj(entry.Key, entry.Value)) // Key:DbcMap Value:FilePath
                     {
-                        MapFilesGenerator.GenerateMapFiles(map);
+                        MapFilesGenerator.GenerateMapFiles(map, out int generatedMaps);
+                        GeneratedMapFiles += generatedMaps;
                         LoadedMaps.Add(entry.Key);
                     }
 
@@ -95,6 +97,7 @@ namespace AlphaCoreExtractor
 
                 WDTFiles?.Clear();
                 Console.WriteLine();
+                Logger.Success($"Generated a total of {GeneratedMapFiles} .map files.");
                 Logger.Success("Process Complete, press any key to exit...");
             }
             catch (Exception ex)
