@@ -58,8 +58,7 @@ namespace AlphaCoreExtractor.Generator
                             generatedMaps++;
                         }
 
-                        processed++;
-                        Logger.Progress(processed, total);
+                        Logger.Progress(processed++, total);
                     }
                 }
 
