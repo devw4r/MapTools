@@ -3,6 +3,10 @@
 // Github:  https://github.com/The-Alpha-Project
 
 using System;
+using System.IO;
+using System.Text;
+using System.Reflection;
+
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
 
@@ -10,6 +14,13 @@ namespace AlphaCoreExtractor.Generator
 {
     public static class Extensions
     {
+        public static void WriteMapVersion(this FileStream fs)
+        {
+            var assembly = Assembly.GetExecutingAssembly().GetName();
+            var version = $"ACMAP_{assembly.Version.Major}.{assembly.Version.Build}0";
+            fs.Write(Encoding.ASCII.GetBytes(version), 0, 10);
+        }
+
         public static Cell TransformHeightData(this CMapArea tileBlock)
         {
             Cell cell = new Cell();

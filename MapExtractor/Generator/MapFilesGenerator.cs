@@ -38,12 +38,15 @@ namespace AlphaCoreExtractor.Generator
                             var outputFileName = $@"{Paths.OutputMapsPath}{mapID}{blockX}{blockY}.map";
 
                             if (File.Exists(outputFileName))
-                                throw new Exception("Found existent invalid file!");
+                            {
+                                try { File.Delete(outputFileName); } 
+                                catch (Exception ex) { Logger.Error(ex.Message); return false; }
+                            }
 
                             using (FileStream fs = new FileStream(outputFileName, FileMode.Create))
                             {
                                 //Map version.
-                                fs.Write(Encoding.ASCII.GetBytes(Globals.MapVersion), 0, 10);
+                                fs.WriteMapVersion();
                                 using (BinaryWriter bw = new BinaryWriter(fs))
                                 {
                                     WriteHeightMap(bw, tileBlock);
