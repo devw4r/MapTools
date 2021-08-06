@@ -105,7 +105,7 @@ namespace AlphaCoreExtractor.MPQ
                                     streamOut.Write(buf, 0, cb);
 
                                     processed += cb;
-                                    Logger.Progress(processed, (uint)total);
+                                    Logger.Progress(processed, (uint)total, 200);
                                 }
 
                                 streamOut.Close();

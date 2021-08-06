@@ -22,7 +22,6 @@ namespace AlphaCoreExtractor
     {
         public static List<DBCMap> LoadedMaps = new List<DBCMap>();
         private static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
-        private static Queue<char> Loading = new Queue<char>();
         private static Thread MapsThread;
         private static volatile bool IsRunning = false;
 
@@ -34,10 +33,7 @@ namespace AlphaCoreExtractor
             MapsThread.Start();
 
             while (IsRunning)
-            {
-                Thread.Sleep(1000);
-                UpdateLoadingStatus();
-            }
+                Thread.Sleep(2000);
 
             MapsThread.Join(2000);
             MapsThread.Interrupt();
@@ -110,7 +106,7 @@ namespace AlphaCoreExtractor
             }
         }
 
-        #region crap
+
         public static void SetDefaultTitle()
         {
             Console.Title = $"AlphaCore Map Extractor {Version}";
@@ -123,25 +119,5 @@ namespace AlphaCoreExtractor
             Console.WriteLine("Github: https://github.com/The-Alpha-Project");
             Console.WriteLine();
         }
-
-        /// <summary>
-        /// We dont report real progress, eventually, we could estimate.
-        /// </summary>
-        private static void UpdateLoadingStatus()
-        {
-            if (IsRunning)
-            {
-                Loading.Enqueue('.');
-                Console.Title = $"AlphaCore Map Extractor {Version}  |  Working, please wait {string.Join("", Loading.ToArray())}";
-
-                if (Loading.Count > 5)
-                    Loading.Clear();
-            }
-            else
-            {
-                SetDefaultTitle();
-            }
-        }
-        #endregion
     }
 }

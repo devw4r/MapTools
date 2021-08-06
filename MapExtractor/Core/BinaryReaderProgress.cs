@@ -48,6 +48,15 @@ namespace AlphaCoreExtractor.Core
             return base.ReadSByte();
         }
 
+        public void ReadToEOF()
+        {
+            if (this.BaseStream.Position != base.BaseStream.Length)
+            {
+                base.BaseStream.Position = base.BaseStream.Length;
+                NotifyProgress();
+            }
+        }
+
         /// <summary>
         /// Not real 'progress' but could be eventually.
         /// </summary>

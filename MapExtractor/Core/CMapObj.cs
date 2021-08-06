@@ -86,7 +86,14 @@ namespace AlphaCoreExtractor.Core
             else
                 Name = Path.GetFileNameWithoutExtension(filePath);
 
+            this.OnRead += OnBytesRead;
             LoadData();
+        }
+
+        
+        private void OnBytesRead(object sender, EventArgs e)
+        {
+            Logger.Progress(this.BaseStream.Position, this.BaseStream.Length, 1000);
         }
 
         public void LoadData()
@@ -128,6 +135,9 @@ namespace AlphaCoreExtractor.Core
             if (Globals.Verbose) Logger.Info($"Reading {TileBlocksInformation.Length} TileBlocks information...");
             if (!LoadMapAreaChunks())
                 return;
+
+            // Read remaining bytes.
+            this.ReadToEOF();
 
             if (Globals.Verbose)
             {
@@ -372,6 +382,7 @@ namespace AlphaCoreExtractor.Core
 
         protected override void Dispose(bool disposing)
         {
+            this.OnRead -= OnBytesRead;
             DBCMap = null;
             Name = string.Empty;
             SMOHeader = null;
