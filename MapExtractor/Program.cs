@@ -21,7 +21,7 @@ namespace AlphaCoreExtractor
     class Program
     {
         public static List<DBCMap> LoadedMaps = new List<DBCMap>();
-        private static Version Version;
+        private static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
         private static Queue<char> Loading = new Queue<char>();
         private static Thread MapsThread;
         private static volatile bool IsRunning = false;
@@ -47,7 +47,6 @@ namespace AlphaCoreExtractor
 
         private static void StartProcess()
         {
-            Version = Assembly.GetExecutingAssembly().GetName().Version;
             SetDefaultTitle();
             PrintHeader();
 
