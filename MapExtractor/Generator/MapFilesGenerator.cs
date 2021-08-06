@@ -17,19 +17,20 @@ namespace AlphaCoreExtractor.Generator
 {
     public class MapFilesGenerator
     {
-        public static bool GenerateMapFiles(CMapObj map, out int generatedMaps)
+        public static void GenerateMapFiles(CMapObj map, out int generatedMaps)
         {
             generatedMaps = 0;
             try
             {
-                Logger.Notice($"Generating .map files for Map {map.DBCMap.MapName_enUS}");            
+                var total = Constants.TileBlockSize * Constants.TileBlockSize;
+                var processed = 0;
+                Logger.Notice($"Generating .map files for Map {map.DBCMap.MapName_enUS}");
                 // HeightMap
                 for (int tileBlockX = 0; tileBlockX < Constants.TileBlockSize; tileBlockX++)
                 {
                     for (int tileBlockY = 0; tileBlockY < Constants.TileBlockSize; tileBlockY++)
                     {
-                        CMapArea tileArea = map.TileBlocks[tileBlockX, tileBlockY];
-                        if (tileArea != null)
+                        if (map.TileBlocks[tileBlockX, tileBlockY] is CMapArea tileArea)
                         {
                             var mapID = map.DBCMap.ID.ToString("000");
                             var blockX = tileBlockX.ToString("00");
@@ -38,8 +39,8 @@ namespace AlphaCoreExtractor.Generator
 
                             if (File.Exists(outputFileName))
                             {
-                                try { File.Delete(outputFileName); } 
-                                catch (Exception ex) { Logger.Error(ex.Message); return false; }
+                                try { File.Delete(outputFileName); }
+                                catch (Exception ex) { Logger.Error(ex.Message); return; }
                             }
 
                             using (FileStream fileStream = new FileStream(outputFileName, FileMode.Create))
@@ -56,6 +57,10 @@ namespace AlphaCoreExtractor.Generator
 
                             generatedMaps++;
                         }
+
+                        processed++;
+                        var progress = (int)processed * 100 / total;
+                        Logger.Progress(progress);
                     }
                 }
 
@@ -63,14 +68,11 @@ namespace AlphaCoreExtractor.Generator
                     Logger.Warning($"No tile data for Map {map.DBCMap.MapName_enUS}");
                 else
                     Logger.Success($"Generated {generatedMaps} .map files for Map {map.DBCMap.MapName_enUS}");
-                return true;
             }
             catch (Exception ex)
             {
                 Logger.Error(ex.Message);
             }
-
-            return false;
         }
 
         private static void WriteLiquids(BinaryWriter binaryWriter, CMapArea tileArea)

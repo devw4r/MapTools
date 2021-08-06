@@ -40,5 +40,16 @@ namespace AlphaCoreExtractor.Log
             Console.WriteLine($"{"[WARNING]"} {message}");
             Console.ResetColor();
         }
+
+        public static void Progress(int progress)
+        {
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write($"{"[PROGRESS]"} {progress}%");
+            Console.ResetColor();
+
+            if(progress == 100)
+                Console.Write(Environment.NewLine);
+        }
     }
 }
