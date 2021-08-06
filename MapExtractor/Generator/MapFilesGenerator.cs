@@ -22,8 +22,8 @@ namespace AlphaCoreExtractor.Generator
             generatedMaps = 0;
             try
             {
-                var total = Constants.TileBlockSize * Constants.TileBlockSize;
-                var processed = 0;
+                int total_tiles = Constants.TileBlockSize * Constants.TileBlockSize;
+                int processed_tiles = 0;
                 Logger.Notice($"Generating .map files for Map {map.DBCMap.MapName_enUS}");
                 // HeightMap
                 for (int tileBlockX = 0; tileBlockX < Constants.TileBlockSize; tileBlockX++)
@@ -58,7 +58,7 @@ namespace AlphaCoreExtractor.Generator
                             generatedMaps++;
                         }
 
-                        Logger.Progress(processed++, total);
+                        Logger.Progress(processed_tiles++, total_tiles);
                     }
                 }
 
