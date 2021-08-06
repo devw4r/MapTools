@@ -93,7 +93,7 @@ namespace AlphaCoreExtractor.Core
         
         private void OnBytesRead(object sender, EventArgs e)
         {
-            Logger.Progress(this.BaseStream.Position, this.BaseStream.Length, 1000);
+            Logger.Progress("Parsing map data", this.BaseStream.Position, this.BaseStream.Length, 1000);
         }
 
         public void LoadData()
