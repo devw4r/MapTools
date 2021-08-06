@@ -59,8 +59,7 @@ namespace AlphaCoreExtractor.Generator
                         }
 
                         processed++;
-                        var progress = (int)processed * 100 / total;
-                        Logger.Progress(progress);
+                        Logger.Progress(processed, total);
                     }
                 }
 
