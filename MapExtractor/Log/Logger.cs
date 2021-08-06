@@ -41,9 +41,9 @@ namespace AlphaCoreExtractor.Log
             Console.ResetColor();
         }
 
-        public static void Progress(int processed, int total)
+        public static void Progress(Int64 processed, Int64 total)
         {
-            var progress = (int)processed * 100 / total;
+            Int64 progress = processed * 100 / total;
             Console.SetCursorPosition(0, Console.CursorTop);
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write($"{"[PROGRESS]"} {progress}%");

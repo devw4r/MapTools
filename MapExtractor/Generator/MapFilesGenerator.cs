@@ -22,7 +22,7 @@ namespace AlphaCoreExtractor.Generator
             generatedMaps = 0;
             try
             {
-                int total_tiles = Constants.TileBlockSize * Constants.TileBlockSize;
+                uint total_tiles = Convert.ToUInt32(Constants.TileBlockSize * Constants.TileBlockSize);
                 int processed_tiles = 0;
                 Logger.Notice($"Generating .map files for Map {map.DBCMap.MapName_enUS}");
                 // HeightMap

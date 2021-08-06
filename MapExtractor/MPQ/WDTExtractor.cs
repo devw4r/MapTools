@@ -92,6 +92,8 @@ namespace AlphaCoreExtractor.MPQ
                         // Copy to destination file
                         using (Stream streamIn = archive.OpenFile(entry))
                         {
+                            Int64 total = streamIn.Length;
+                            Int64 processed = 0;
                             using (Stream streamOut = new FileStream(outputWdtPath, FileMode.Create))
                             {
                                 while (true)
@@ -101,6 +103,9 @@ namespace AlphaCoreExtractor.MPQ
                                         break;
 
                                     streamOut.Write(buf, 0, cb);
+
+                                    processed += cb;
+                                    Logger.Progress(processed, (uint)total);
                                 }
 
                                 streamOut.Close();
