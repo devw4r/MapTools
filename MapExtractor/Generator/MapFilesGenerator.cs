@@ -28,8 +28,8 @@ namespace AlphaCoreExtractor.Generator
                 {
                     for (int tileBlockY = 0; tileBlockY < Constants.TileBlockSize; tileBlockY++)
                     {
-                        var tileBlock = map.TileBlocks[tileBlockX, tileBlockY];
-                        if (tileBlock != null)
+                        CMapArea tileArea = map.TileBlocks[tileBlockX, tileBlockY];
+                        if (tileArea != null)
                         {
                             var mapID = map.DBCMap.ID.ToString("000");
                             var blockX = tileBlockX.ToString("00");
@@ -42,15 +42,15 @@ namespace AlphaCoreExtractor.Generator
                                 catch (Exception ex) { Logger.Error(ex.Message); return false; }
                             }
 
-                            using (FileStream fs = new FileStream(outputFileName, FileMode.Create))
+                            using (FileStream fileStream = new FileStream(outputFileName, FileMode.Create))
                             {
                                 //Map version.
-                                fs.WriteMapVersion();
-                                using (BinaryWriter bw = new BinaryWriter(fs))
+                                fileStream.WriteMapVersion();
+                                using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
                                 {
-                                    WriteHeightMap(bw, tileBlock);
-                                    WriteAreaInformation(bw, tileBlock, map);
-                                    WriteLiquids(bw, tileBlock);
+                                    WriteHeightMap(binaryWriter, tileArea);
+                                    WriteAreaInformation(binaryWriter, tileArea, map);
+                                    WriteLiquids(binaryWriter, tileArea);
                                 }
                             }
 
@@ -73,7 +73,7 @@ namespace AlphaCoreExtractor.Generator
             return false;
         }
 
-        private static void WriteLiquids(BinaryWriter bw, CMapArea tileBlock)
+        private static void WriteLiquids(BinaryWriter binaryWriter, CMapArea tileArea)
         {
             bool[,] liquid_show = new bool[Constants.GridSize, Constants.GridSize];
             float[,] liquid_height = new float[Constants.GridSize + 1, Constants.GridSize + 1];
@@ -83,7 +83,7 @@ namespace AlphaCoreExtractor.Generator
             {
                 for (int j = 0; j < Constants.TileSize; j++)
                 {
-                    var cell = tileBlock.Tiles[i, j];
+                    var cell = tileArea.Tiles[i, j];
 
                     if (cell == null || cell.MCLQSubChunks.Count == 0)
                         continue;
@@ -127,45 +127,45 @@ namespace AlphaCoreExtractor.Generator
                 {
                     if (liquid_show[y, x])
                     {
-                        bw.Write(liquid_flag[y, x]);
-                        bw.Write(liquid_height[y, x]);
+                        binaryWriter.Write(liquid_flag[y, x]);
+                        binaryWriter.Write(liquid_height[y, x]);
                     }
                     else
-                        bw.Write((sbyte)-1);
+                        binaryWriter.Write((sbyte)-1);
                 }
             }
         }
 
-        private static void WriteAreaInformation(BinaryWriter bw, CMapArea tileBlock, CMapObj map)
+        private static void WriteAreaInformation(BinaryWriter binaryWriter, CMapArea tileArea, CMapObj map)
         {
             for (int cy = 0; cy < Constants.TileSize; cy++)
             {
                 for (int cx = 0; cx < Constants.TileSize; cx++)
                 {
-                    var cell = tileBlock.Tiles[cy, cx];
+                    var cell = tileArea.Tiles[cy, cx];
                     var areaNumber = cell.areaNumber;
 
                     if (map.DBCMap.ID < 2 && areaNumber < 4000000000 && DBCStorage.TryGetAreaByMapIdAndAreaNumber(map.DBCMap.ID, areaNumber, out AreaTable areaTable))
                     {
-                        bw.Write((int)areaTable.ID);
-                        bw.Write((uint)areaTable.AreaNumber);
-                        bw.Write((byte)areaTable.Area_Flags);
-                        bw.Write((byte)areaTable.Area_Level);
-                        bw.Write((ushort)areaTable.Exploration_Bit);
-                        bw.Write((byte)areaTable.FactionGroupMask);
+                        binaryWriter.Write((int)areaTable.ID);
+                        binaryWriter.Write((uint)areaTable.AreaNumber);
+                        binaryWriter.Write((byte)areaTable.Area_Flags);
+                        binaryWriter.Write((byte)areaTable.Area_Level);
+                        binaryWriter.Write((ushort)areaTable.Exploration_Bit);
+                        binaryWriter.Write((byte)areaTable.FactionGroupMask);
                     }
                     else
-                        bw.Write((int)-1);
+                        binaryWriter.Write((int)-1);
                 }
             }
         }
 
-        private static void WriteHeightMap(BinaryWriter bw, CMapArea tileBlock)
+        private static void WriteHeightMap(BinaryWriter binaryWriter, CMapArea tileArea)
         {
-            var cell = tileBlock.TransformHeightData();
+            var cell = tileArea.TransformHeightData();
             for (int cy = 0; cy < 256; cy++)
                 for (int cx = 0; cx < 256; cx++)
-                    bw.Write(cell.CalculateZ(cy, cx));
+                    binaryWriter.Write(cell.CalculateZ(cy, cx));
         }
     }
 }
