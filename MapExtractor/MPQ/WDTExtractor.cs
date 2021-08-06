@@ -74,7 +74,7 @@ namespace AlphaCoreExtractor.MPQ
             {
                 using (MpqArchive archive = new MpqArchive(fileName))
                 {
-                    byte[] buf = new byte[0x40000];
+                    byte[] buf = new byte[0x80000];
                     var outputName = Path.GetFileNameWithoutExtension(fileName);
 
                     Logger.Info($"Extracting {outputName}...");
