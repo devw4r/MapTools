@@ -70,7 +70,7 @@ namespace AlphaCoreExtractor.Core
         /// <summary>
         /// How many tiles we have information for.
         /// </summary>
-        public uint UnUsableTiles => (64 * 64) - UsableTiles;
+        public uint UnUsableTiles => ((uint)Constants.TileBlockSize * (uint)Constants.TileBlockSize) - UsableTiles;
 
         /// <summary>
         /// Used to read file tokens and validate chunks.
