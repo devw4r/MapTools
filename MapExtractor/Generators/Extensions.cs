@@ -23,10 +23,18 @@ namespace AlphaCoreExtractor.Generators
 
         public static void ToRecastCoordinates<T>(this Vector<T> vertex)
         {
-            var x = vertex.X;
+            var z = vertex.X;
             vertex.X = vertex.Y;
             vertex.Y = vertex.Z;
-            vertex.Z = x;
+            vertex.Z = z;
+        }
+
+        public static void ToWoWCoordinates<T>(this Vector<T> vertex)
+        {
+            var z = vertex.X;
+            vertex.X = vertex.Z;
+            vertex.Z = vertex.Y;
+            vertex.Y = z;
         }
 
         public static Cell TransformHeightData(this CMapArea tileBlock)
