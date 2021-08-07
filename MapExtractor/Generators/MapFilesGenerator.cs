@@ -97,7 +97,6 @@ namespace AlphaCoreExtractor.Generators
                     else
                         liquid = cell.MCLQSubChunks.First();
 
-
                     for (int y = 0; y < Constants.CellSize; y++)
                     {
                         int cy = i * Constants.CellSize + y;
