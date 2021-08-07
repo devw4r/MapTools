@@ -122,7 +122,7 @@ namespace AlphaCoreExtractor.Generators
             {
                 foreach (var vertex in vertices)
                 {
-                    vertex.TransformWoWCoordsToRecastCoords();
+                    vertex.ToRecastCoordinates();
                     file.WriteLine("v {0} {1} {2}", vertex.X, vertex.Y, vertex.Z);
                 }
 
