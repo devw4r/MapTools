@@ -13,7 +13,7 @@ using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.Helpers.Enums;
 using AlphaCoreExtractor.DBC.Structures;
 
-namespace AlphaCoreExtractor.Generator
+namespace AlphaCoreExtractor.Generators
 {
     public class MapFilesGenerator
     {
@@ -25,7 +25,7 @@ namespace AlphaCoreExtractor.Generator
                 uint total_tiles = Convert.ToUInt32(Constants.TileBlockSize * Constants.TileBlockSize);
                 int processed_tiles = 0;
                 Logger.Notice($"Generating .map files for Map {map.DBCMap.MapName_enUS}");
-                // HeightMap
+
                 for (int tileBlockX = 0; tileBlockX < Constants.TileBlockSize; tileBlockX++)
                 {
                     for (int tileBlockY = 0; tileBlockY < Constants.TileBlockSize; tileBlockY++)
@@ -75,9 +75,9 @@ namespace AlphaCoreExtractor.Generator
 
         private static void WriteLiquids(BinaryWriter binaryWriter, CMapArea tileArea)
         {
-            bool[,] liquid_show = new bool[Constants.GridSize, Constants.GridSize];
-            float[,] liquid_height = new float[Constants.GridSize + 1, Constants.GridSize + 1];
-            sbyte[,] liquid_flag = new sbyte[Constants.GridSize + 1, Constants.GridSize + 1];
+            bool[,] liquid_show = new bool[(int)Constants.GridSize, (int)Constants.GridSize];
+            float[,] liquid_height = new float[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
+            sbyte[,] liquid_flag = new sbyte[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
 
             for (int i = 0; i < Constants.TileSize; i++)
             {

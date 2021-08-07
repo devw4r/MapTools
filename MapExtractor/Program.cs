@@ -13,7 +13,7 @@ using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
-using AlphaCoreExtractor.Generator;
+using AlphaCoreExtractor.Generators;
 using AlphaCoreExtractor.DBC.Structures;
 
 namespace AlphaCoreExtractor
@@ -82,6 +82,7 @@ namespace AlphaCoreExtractor
                 {
                     using (CMapObj map = new CMapObj(entry.Key, entry.Value)) // Key:DbcMap Value:FilePath
                     {
+                        //NavmeshGenerator.GenerateNavmeshes(map, out int generatedMeshes);
                         MapFilesGenerator.GenerateMapFiles(map, out int generatedMaps);
                         GeneratedMapFiles += generatedMaps;
                         LoadedMaps.Add(entry.Key);

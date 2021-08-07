@@ -38,12 +38,12 @@ namespace AlphaCoreExtractor.Core
         /// <summary>
         /// Offsets/Sizes for each Tile.
         /// </summary>
-        public SMChunkInfo[,] TilesInformation = new SMChunkInfo[Constants.TileSize, Constants.TileSize];
+        public SMChunkInfo[,] TilesInformation = new SMChunkInfo[(int)Constants.TileSize, (int)Constants.TileSize];
 
         /// <summary>
         /// The actual Tiles.
         /// </summary>
-        public SMChunk[,] Tiles = new SMChunk[Constants.TileSize, Constants.TileSize];
+        public SMChunk[,] Tiles = new SMChunk[(int)Constants.TileSize, (int)Constants.TileSize];
 
         /// <summary>
         /// Failed to parse something?

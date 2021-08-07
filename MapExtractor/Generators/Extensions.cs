@@ -10,7 +10,7 @@ using System.Reflection;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
 
-namespace AlphaCoreExtractor.Generator
+namespace AlphaCoreExtractor.Generators
 {
     public static class Extensions
     {
