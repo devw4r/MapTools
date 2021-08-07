@@ -82,7 +82,7 @@ namespace AlphaCoreExtractor
                 {
                     using (CMapObj map = new CMapObj(entry.Key, entry.Value)) // Key:DbcMap Value:FilePath
                     {
-                        //NavmeshGenerator.GenerateNavmeshes(map, out int generatedMeshes);
+                        //TerrainMeshGenerator.BuildTerrainMesh(map);
                         MapFilesGenerator.GenerateMapFiles(map, out int generatedMaps);
                         GeneratedMapFiles += generatedMaps;
                         LoadedMaps.Add(entry.Key);

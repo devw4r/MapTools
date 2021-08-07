@@ -21,6 +21,14 @@ namespace AlphaCoreExtractor.Generators
             fs.Write(Encoding.ASCII.GetBytes(version), 0, 10);
         }
 
+        public static void TransformWoWCoordsToRecastCoords<T>(this Vector<T> vertex)
+        {
+            var x = vertex.X;
+            vertex.X = vertex.Y;
+            vertex.Y = vertex.Z;
+            vertex.Z = x;
+        }
+
         public static Cell TransformHeightData(this CMapArea tileBlock)
         {
             Cell cell = new Cell();

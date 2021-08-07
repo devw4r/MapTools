@@ -117,7 +117,7 @@
     <Compile Include="DBC\Structures\DBCMap.cs" />
     <Compile Include="Generators\Extensions.cs" />
     <Compile Include="Generators\MapFilesGenerator.cs" />
-    <Compile Include="Generators\NavmeshGenerator.cs" />
+    <Compile Include="Generators\TerrainMeshGenerator.cs" />
     <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\Enums.cs" />
     <Compile Include="Helpers\Extensions.cs" />

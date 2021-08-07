@@ -29,7 +29,7 @@ namespace AlphaCoreExtractor.Core
         public uint sizeShadow;
         public uint areaNumber;
         public uint nMapObjRefs;
-        public ushort holes_low_res;
+        public ushort holes_low_mask;
         public ushort padding;
         public byte[] predTex = new byte[8];
         public byte[] noEffectDoodad = new byte[8];
@@ -38,6 +38,23 @@ namespace AlphaCoreExtractor.Core
         public uint offsLiquid;
         public byte[] unused = new byte[24];
         private long HeaderOffsetEnd = 0;
+
+
+        private bool[,] holesMap;
+        public bool[,] HolesMap
+        {
+            get
+            {
+                if (holesMap == null)
+                {
+                    holesMap = new bool[4, 4];
+                    for (var i = 0; i < 16; i++)
+                        holesMap[i / 4, i % 4] = (((holes_low_mask >> (i)) & 1) == 1);
+                }
+                return holesMap;
+            }
+        }
+
 
         public bool HasLiquids = false;
         public MCNRSubChunk MCNRSubChunk;
@@ -65,7 +82,7 @@ namespace AlphaCoreExtractor.Core
             sizeShadow = reader.ReadUInt32();
             areaNumber = reader.ReadUInt32(); // in alpha: zone id (4) sub zone id (4)
             nMapObjRefs = reader.ReadUInt32();
-            holes_low_res = reader.ReadUInt16();
+            holes_low_mask = reader.ReadUInt16();
             padding = reader.ReadUInt16();
             predTex = reader.ReadBytes(16); //It is used to determine which detail doodads to show. 2 bit 8*8 arr unsigned integers naming the layer.
             noEffectDoodad = reader.ReadBytes(8); // 1 bit 8*8 arr, doodads disabled if 1

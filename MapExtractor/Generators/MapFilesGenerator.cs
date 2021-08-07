@@ -98,12 +98,12 @@ namespace AlphaCoreExtractor.Generators
                         liquid = cell.MCLQSubChunks.First();
 
 
-                    for (int y = 0; y < Constants.Cell_Size; y++)
+                    for (int y = 0; y < Constants.CellSize; y++)
                     {
-                        int cy = i * Constants.Cell_Size + y;
-                        for (int x = 0; x < Constants.Cell_Size; x++)
+                        int cy = i * Constants.CellSize + y;
+                        for (int x = 0; x < Constants.CellSize; x++)
                         {
-                            int cx = j * Constants.Cell_Size + x;
+                            int cx = j * Constants.CellSize + x;
                             // Check if this liquid is rendered by the client.
                             if (liquid.Flags[y, x] != 0x0F)
                             {
