@@ -9,6 +9,7 @@ using System.Reflection;
 
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.Helpers.Enums;
 
 namespace AlphaCoreExtractor.Generators
 {
@@ -23,18 +24,28 @@ namespace AlphaCoreExtractor.Generators
 
         public static void ToRecastCoordinates<T>(this Vector<T> vertex)
         {
+            if (vertex.CoordsType == CoordinatesType.Recast)
+                return;
+
             var z = vertex.X;
             vertex.X = vertex.Y;
             vertex.Y = vertex.Z;
             vertex.Z = z;
+
+            vertex.CoordsType = CoordinatesType.Recast;
         }
 
         public static void ToWoWCoordinates<T>(this Vector<T> vertex)
         {
+            if (vertex.CoordsType == CoordinatesType.WoW)
+                return;
+
             var z = vertex.X;
             vertex.X = vertex.Z;
             vertex.Z = vertex.Y;
             vertex.Y = z;
+
+            vertex.CoordsType = CoordinatesType.WoW;
         }
 
         public static Cell TransformHeightData(this CMapArea tileBlock)

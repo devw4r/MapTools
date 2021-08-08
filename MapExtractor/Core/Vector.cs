@@ -2,10 +2,14 @@
 // Discord: https://discord.gg/RzBMAKU
 // Github:  https://github.com/The-Alpha-Project
 
+using AlphaCoreExtractor.Helpers.Enums;
+
 namespace AlphaCoreExtractor.Core
 {
     public class Vector<T>
     {
+        public CoordinatesType CoordsType = CoordinatesType.WoW;
+
         public T X;
         public T Y;
         public T Z;

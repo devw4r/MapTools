@@ -48,9 +48,9 @@ namespace AlphaCoreExtractor.Generators
                         {
                             for (var y = 0; y < Constants.TileSize; y++)
                             {
-                                var chunk = tileArea.Tiles[x, y];
-                                var heights = chunk.MCVTSubChunk.GetLowResMapMatrix();
-                                var holes = (chunk.holes_low_mask > 0) ? chunk.HolesMap : EmptyHolesArray;
+                                var tileChunk = tileArea.Tiles[x, y];
+                                var heights = tileChunk.MCVTSubChunk.GetLowResMapMatrix();
+                                var holes = (tileChunk.holes_low_mask > 0) ? tileChunk.HolesMap : EmptyHolesArray;
 
                                 // Add the height map values, inserting them into their correct positions.
                                 for (var unitX = 0; unitX <= Constants.CellSize; unitX++)
@@ -75,9 +75,7 @@ namespace AlphaCoreExtractor.Generators
                                             tileVerts.Add(Vector<float>.Build(xPos, yPos, zPos));
                                         }
 
-                                        if (unitY == Constants.CellSize)
-                                            continue;
-                                        if (unitX == Constants.CellSize)
+                                        if (unitY == Constants.CellSize || unitX == Constants.CellSize)
                                             continue;
 
                                         tileHolesMap[tileX, tileY] = holes[unitX / 2, unitY / 2];
