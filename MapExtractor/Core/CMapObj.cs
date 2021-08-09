@@ -41,15 +41,15 @@ namespace AlphaCoreExtractor.Core
 
         /// <summary>
         /// Doodads Names used across all map.
-        /// Each name points to a .wdx file.
+        /// Each name points to a .mdx file.
         /// </summary>
-        public List<string> DoodadsNames = new List<string>();
+        public List<string> MDXs = new List<string>();
 
         /// <summary>
         /// Object name sused across all map.
         /// Each name points to a .wmo file.
         /// </summary>
-        public List<string> MapObjectsNames = new List<string>();
+        public List<string> WMOs = new List<string>();
 
         /// <summary>
         /// Only one instance is possible. It is usually used by WMO based maps which contain no ADT parts with the exception of RazorfenDowns.
@@ -145,8 +145,8 @@ namespace AlphaCoreExtractor.Core
                 Logger.Notice($"Map information:");
                 Logger.Info($"ADT Version: {ADTVersion}");
                 Logger.Info(SMOHeader.ToString());
-                Logger.Info($"DoodadsNames (.wdx): {DoodadsNames.Count}");
-                Logger.Info($"MapObjectsNames (.wmo): {MapObjectsNames.Count}");
+                Logger.Info($"MDX references (.mdx): {MDXs.Count}");
+                Logger.Info($"WMO references (.wmo): {WMOs.Count}");
                 Logger.Info($"Usable Tiles: {UsableTiles}");
                 Logger.Info($"UnUsable Tiles: {UnUsableTiles}");
                 PrintTileBlockInformation(DBCMap.ID);
@@ -165,9 +165,9 @@ namespace AlphaCoreExtractor.Core
                 if (this.IsEOF())
                     return false;
 
-                for (uint x = 0; x < 64; x++)
+                for (uint x = 0; x < Constants.TileBlockSize; x++)
                 {
-                    for (uint y = 0; y < 64; y++)
+                    for (uint y = 0; y < Constants.TileBlockSize; y++)
                     {
                         var tileBlock = TileBlocksInformation[x, y];
                         // Do we have data for this Tile?
@@ -317,11 +317,11 @@ namespace AlphaCoreExtractor.Core
                 {
                     long final_position = this.BaseStream.Position + DataChunkHeader.Size;
                     while (this.BaseStream.Position < final_position)
-                        DoodadsNames.Add(this.ReadCString());
+                        MDXs.Add(this.ReadCString());
                 }
 
                 if (Globals.Verbose)
-                    Logger.Success($"Loaded {DoodadsNames.Count} DoodadNames.");
+                    Logger.Success($"Loaded {MDXs.Count} MDX references.");
 
                 return true;
             }
@@ -348,11 +348,11 @@ namespace AlphaCoreExtractor.Core
                 {
                     long final_position = this.BaseStream.Position + DataChunkHeader.Size;
                     while (this.BaseStream.Position < final_position)
-                        MapObjectsNames.Add(this.ReadCString());
+                        WMOs.Add(this.ReadCString());
                 }
 
                 if (Globals.Verbose)
-                    Logger.Success($"Loaded {MapObjectsNames.Count} MapObjectsNames.");
+                    Logger.Success($"Loaded {WMOs.Count} WMO references.");
 
                 return true;
             }
@@ -387,10 +387,10 @@ namespace AlphaCoreExtractor.Core
             Name = string.Empty;
             SMOHeader = null;
             TileBlocksInformation = null;
-            DoodadsNames.Clear();
-            DoodadsNames = null;
-            MapObjectsNames.Clear();
-            MapObjectsNames = null;
+            MDXs.Clear();
+            MDXs = null;
+            WMOs.Clear();
+            WMOs = null;
             MODF = null;
             TileBlocks = null;
             DataChunkHeader = null;

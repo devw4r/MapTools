@@ -39,6 +39,7 @@ namespace AlphaCoreExtractor.Core
         public byte[] unused = new byte[24];
         private long HeaderOffsetEnd = 0;
 
+        public bool HasLiquids = false;
 
         private bool[,] holesMap;
         public bool[,] HolesMap
@@ -54,9 +55,11 @@ namespace AlphaCoreExtractor.Core
                 return holesMap;
             }
         }
-
-
-        public bool HasLiquids = false;
+  
+        /// MDX index reference to MDNM
+        public List<int> MDXindexReference = new List<int>();
+        /// WMO index reference to MONM
+        public List<int> WMOindexReference = new List<int>();
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
         public MCSHSubChunk MCSHSubChunk;
@@ -177,20 +180,7 @@ namespace AlphaCoreExtractor.Core
         }
 
         /// <summary>
-        /// TODO
-        /// </summary>
-        private void BuildMCAL(BinaryReader reader, uint offset, int size)
-        {
-            reader.SetPosition(offset + HeaderOffsetEnd);
-
-            if (reader.IsEOF())
-                return;
-
-            reader.ReadBytes(size);
-        }
-
-        /// <summary>
-        /// TODO
+        /// Since there are no MMDX/MWMO MMID/MWID in alpha ADT, MCRF entries directly point to index in MDNM and MONM chunks.
         /// </summary>
         private void BuildMCRF(BinaryReader reader, uint offset)
         {
@@ -202,12 +192,25 @@ namespace AlphaCoreExtractor.Core
             var dataHeader = new DataChunkHeader(reader);
             if (dataHeader.Token != Tokens.MCRF)
                 throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCRF]"}");
-            reader.ReadBytes(dataHeader.Size);
+
+            for (var i = 0; i < nDoodadRefs; i++)
+                MDXindexReference.Add(reader.ReadInt32());
+
+            for (var i = 0; i < nMapObjRefs; i++)
+                WMOindexReference.Add(reader.ReadInt32());
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
+        #region TODO
+        private void BuildMCAL(BinaryReader reader, uint offset, int size)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
+            reader.ReadBytes(size);
+        }
+
         private void BuildMCLY(BinaryReader reader, uint offset)
         {
             reader.SetPosition(offset + HeaderOffsetEnd);
@@ -220,6 +223,7 @@ namespace AlphaCoreExtractor.Core
                 throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCLY]"}");
             reader.ReadBytes(dataHeader.Size);
         }
+        #endregion
 
         public void Dispose()
         {

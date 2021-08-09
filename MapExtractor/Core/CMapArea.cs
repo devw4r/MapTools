@@ -28,12 +28,12 @@ namespace AlphaCoreExtractor.Core
         /// <summary>
         /// MDX refs for this TileBlock.
         /// </summary>
-        public SMDoodadDef[] DoodadRefs;
+        public Dictionary<uint, SMDoodadDef> MDXs = new Dictionary<uint, SMDoodadDef>();
 
         /// <summary>
         /// WMO refs for this TileBlock.
         /// </summary>
-        public SMMapObjDef[] SMMapObjDefs;
+        public Dictionary<uint, SMMapObjDef> WMOs = new Dictionary<uint, SMMapObjDef>();
 
         /// <summary>
         /// Offsets/Sizes for each Tile.
@@ -132,7 +132,7 @@ namespace AlphaCoreExtractor.Core
 
                 //MODF (Placement information for WMOs. Additional to this, the WMOs to render are referenced in each MCRF chunk)
                 var dataChunk = reader.ReadBytes(DataChunkHeader.Size);
-                SMMapObjDefs = SMMapObjDef.BuildFromChunk(dataChunk);
+                WMOs = SMMapObjDef.BuildFromChunk(dataChunk);
                 return true;
             }
             catch (Exception ex)
@@ -152,7 +152,7 @@ namespace AlphaCoreExtractor.Core
                     throw new Exception($"Invalid token, got [{DataChunkHeader.Token}] expected {"[MDDF]"}");
 
                 var dataChunk = reader.ReadBytes(DataChunkHeader.Size);
-                DoodadRefs = SMDoodadDef.BuildFromChunck(dataChunk);
+                MDXs = SMDoodadDef.BuildFromChunck(dataChunk);
                 return true;
             }
             catch (Exception ex)
@@ -252,8 +252,8 @@ namespace AlphaCoreExtractor.Core
         {
             AreaHeader = null;
             MTEXChunk = null;
-            DoodadRefs = null;
-            SMMapObjDefs = null;
+            MDXs = null;
+            WMOs = null;
             TilesInformation = null;
 
             foreach (var tile in Tiles)

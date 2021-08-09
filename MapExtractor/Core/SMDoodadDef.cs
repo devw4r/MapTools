@@ -28,18 +28,23 @@ namespace AlphaCoreExtractor.Core
             flags = reader.ReadUInt16();
         }
 
-        public static SMDoodadDef[] BuildFromChunck(byte[] chunk)
+        public static Dictionary<uint, SMDoodadDef> BuildFromChunck(byte[] chunk)
         {
-            List<SMDoodadDef> doodadDefs = new List<SMDoodadDef>();
+            Dictionary<uint, SMDoodadDef> mdxDefs = new Dictionary<uint, SMDoodadDef>();
             using (MemoryStream ms = new MemoryStream(chunk))
             using (BinaryReader reader = new BinaryReader(ms))
+            {
                 while (reader.BaseStream.Position != chunk.Length)
-                    doodadDefs.Add(new SMDoodadDef(reader));
+                {
+                    var doodadDef = new SMDoodadDef(reader);
+                    mdxDefs.Add(doodadDef.uniqueId, doodadDef);
+                }
+            }
 
             if (Globals.Verbose)
-                Logger.Info($"Loaded {doodadDefs.Count} SMDoodadDefs");
+                Logger.Info($"Loaded {mdxDefs.Count} MDX definitions.");
 
-            return doodadDefs.ToArray();
+            return mdxDefs;
         }
     }
 }
