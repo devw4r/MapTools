@@ -34,18 +34,23 @@ namespace AlphaCoreExtractor.Core
             pad = reader.ReadUInt16();
         }
 
-        public static SMMapObjDef[] BuildFromChunk(byte[] chunk)
+        public static Dictionary<uint, SMMapObjDef> BuildFromChunk(byte[] chunk)
         {
-            var mapDefs = new List<SMMapObjDef>();
+            var wmoDefs = new Dictionary<uint, SMMapObjDef>();
             using (MemoryStream ms = new MemoryStream(chunk))
             using (BinaryReader reader = new BinaryReader(ms))
+            {
                 while (reader.BaseStream.Position != chunk.Length)
-                    mapDefs.Add(new SMMapObjDef(reader));
+                {
+                    var wmoDef = new SMMapObjDef(reader);
+                    wmoDefs.Add(wmoDef.uniqueId, wmoDef);
+                }
+            }
 
             if (Globals.Verbose)
-                Logger.Info($"Loaded {mapDefs.Count} SMMapObjDefs");
+                Logger.Info($"Loaded {wmoDefs.Count} WMO definitions.");
 
-            return mapDefs.ToArray();
+            return wmoDefs;
         }
     }
 }

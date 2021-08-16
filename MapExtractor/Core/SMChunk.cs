@@ -29,7 +29,7 @@ namespace AlphaCoreExtractor.Core
         public uint sizeShadow;
         public uint areaNumber;
         public uint nMapObjRefs;
-        public ushort holes_low_res;
+        public ushort holes_low_mask;
         public ushort padding;
         public byte[] predTex = new byte[8];
         public byte[] noEffectDoodad = new byte[8];
@@ -40,6 +40,26 @@ namespace AlphaCoreExtractor.Core
         private long HeaderOffsetEnd = 0;
 
         public bool HasLiquids = false;
+
+        private bool[,] holesMap;
+        public bool[,] HolesMap
+        {
+            get
+            {
+                if (holesMap == null)
+                {
+                    holesMap = new bool[4, 4];
+                    for (var i = 0; i < 16; i++)
+                        holesMap[i / 4, i % 4] = (((holes_low_mask >> (i)) & 1) == 1);
+                }
+                return holesMap;
+            }
+        }
+  
+        /// MDX index reference to MDNM
+        public List<int> MDXindexReference = new List<int>();
+        /// WMO index reference to MONM
+        public List<int> WMOindexReference = new List<int>();
         public MCNRSubChunk MCNRSubChunk;
         public MCVTSubChunk MCVTSubChunk;
         public MCSHSubChunk MCSHSubChunk;
@@ -65,7 +85,7 @@ namespace AlphaCoreExtractor.Core
             sizeShadow = reader.ReadUInt32();
             areaNumber = reader.ReadUInt32(); // in alpha: zone id (4) sub zone id (4)
             nMapObjRefs = reader.ReadUInt32();
-            holes_low_res = reader.ReadUInt16();
+            holes_low_mask = reader.ReadUInt16();
             padding = reader.ReadUInt16();
             predTex = reader.ReadBytes(16); //It is used to determine which detail doodads to show. 2 bit 8*8 arr unsigned integers naming the layer.
             noEffectDoodad = reader.ReadBytes(8); // 1 bit 8*8 arr, doodads disabled if 1
@@ -160,20 +180,7 @@ namespace AlphaCoreExtractor.Core
         }
 
         /// <summary>
-        /// TODO
-        /// </summary>
-        private void BuildMCAL(BinaryReader reader, uint offset, int size)
-        {
-            reader.SetPosition(offset + HeaderOffsetEnd);
-
-            if (reader.IsEOF())
-                return;
-
-            reader.ReadBytes(size);
-        }
-
-        /// <summary>
-        /// TODO
+        /// Since there are no MMDX/MWMO MMID/MWID in alpha ADT, MCRF entries directly point to index in MDNM and MONM chunks.
         /// </summary>
         private void BuildMCRF(BinaryReader reader, uint offset)
         {
@@ -185,12 +192,25 @@ namespace AlphaCoreExtractor.Core
             var dataHeader = new DataChunkHeader(reader);
             if (dataHeader.Token != Tokens.MCRF)
                 throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCRF]"}");
-            reader.ReadBytes(dataHeader.Size);
+
+            for (var i = 0; i < nDoodadRefs; i++)
+                MDXindexReference.Add(reader.ReadInt32());
+
+            for (var i = 0; i < nMapObjRefs; i++)
+                WMOindexReference.Add(reader.ReadInt32());
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
+        #region TODO
+        private void BuildMCAL(BinaryReader reader, uint offset, int size)
+        {
+            reader.SetPosition(offset + HeaderOffsetEnd);
+
+            if (reader.IsEOF())
+                return;
+
+            reader.ReadBytes(size);
+        }
+
         private void BuildMCLY(BinaryReader reader, uint offset)
         {
             reader.SetPosition(offset + HeaderOffsetEnd);
@@ -203,6 +223,7 @@ namespace AlphaCoreExtractor.Core
                 throw new Exception($"Invalid token, got [{dataHeader.Token}] expected {"[MCLY]"}");
             reader.ReadBytes(dataHeader.Size);
         }
+        #endregion
 
         public void Dispose()
         {

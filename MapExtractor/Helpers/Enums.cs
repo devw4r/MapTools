@@ -18,4 +18,10 @@ namespace AlphaCoreExtractor.Helpers.Enums
         FLAG_LQ_DEEP = 0x14,
         HasLiquid = FLAG_LQ_RIVER | FLAG_LQ_OCEAN | FLAG_LQ_MAGMA
     }
+
+    public enum CoordinatesType
+    {
+        Recast,
+        WoW,
+    }      
 }

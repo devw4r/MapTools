@@ -13,7 +13,7 @@ using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Core;
 using AlphaCoreExtractor.Helpers;
-using AlphaCoreExtractor.Generator;
+using AlphaCoreExtractor.Generators;
 using AlphaCoreExtractor.DBC.Structures;
 
 namespace AlphaCoreExtractor
@@ -21,8 +21,7 @@ namespace AlphaCoreExtractor
     class Program
     {
         public static List<DBCMap> LoadedMaps = new List<DBCMap>();
-        private static Version Version;
-        private static Queue<char> Loading = new Queue<char>();
+        private static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
         private static Thread MapsThread;
         private static volatile bool IsRunning = false;
 
@@ -34,10 +33,7 @@ namespace AlphaCoreExtractor
             MapsThread.Start();
 
             while (IsRunning)
-            {
-                Thread.Sleep(1000);
-                UpdateLoadingStatus();
-            }
+                Thread.Sleep(2000);
 
             MapsThread.Join(2000);
             MapsThread.Interrupt();
@@ -47,7 +43,6 @@ namespace AlphaCoreExtractor
 
         private static void StartProcess()
         {
-            Version = Assembly.GetExecutingAssembly().GetName().Version;
             SetDefaultTitle();
             PrintHeader();
 
@@ -81,12 +76,15 @@ namespace AlphaCoreExtractor
                 // Flush .map files output dir.
                 Directory.Delete(Paths.OutputMapsPath, true);
 
+                int GeneratedMapFiles = 0;
                 //Begin parsing adt files and generate .map files.
                 foreach (var entry in WDTFiles)
                 {
                     using (CMapObj map = new CMapObj(entry.Key, entry.Value)) // Key:DbcMap Value:FilePath
                     {
-                        MapFilesGenerator.GenerateMapFiles(map);
+                        //TerrainMeshGenerator.BuildTerrainMesh(map);
+                        MapFilesGenerator.GenerateMapFiles(map, out int generatedMaps);
+                        GeneratedMapFiles += generatedMaps;
                         LoadedMaps.Add(entry.Key);
                     }
 
@@ -95,6 +93,7 @@ namespace AlphaCoreExtractor
 
                 WDTFiles?.Clear();
                 Console.WriteLine();
+                Logger.Success($"Generated a total of {GeneratedMapFiles} .map files.");
                 Logger.Success("Process Complete, press any key to exit...");
             }
             catch (Exception ex)
@@ -108,7 +107,7 @@ namespace AlphaCoreExtractor
             }
         }
 
-        #region crap
+
         public static void SetDefaultTitle()
         {
             Console.Title = $"AlphaCore Map Extractor {Version}";
@@ -121,25 +120,5 @@ namespace AlphaCoreExtractor
             Console.WriteLine("Github: https://github.com/The-Alpha-Project");
             Console.WriteLine();
         }
-
-        /// <summary>
-        /// We dont report real progress, eventually, we could estimate.
-        /// </summary>
-        private static void UpdateLoadingStatus()
-        {
-            if (IsRunning)
-            {
-                Loading.Enqueue('.');
-                Console.Title = $"AlphaCore Map Extractor {Version}  |  Working, please wait {string.Join("", Loading.ToArray())}";
-
-                if (Loading.Count > 5)
-                    Loading.Clear();
-            }
-            else
-            {
-                SetDefaultTitle();
-            }
-        }
-        #endregion
     }
 }

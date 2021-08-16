@@ -7,6 +7,5 @@ namespace AlphaCoreExtractor.Helpers
     public static class Globals
     {
         public static bool Verbose = false;
-        public static readonly string MapVersion = "ACMAP_1.40";
     }
 }

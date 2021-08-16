@@ -8,10 +8,15 @@ namespace AlphaCoreExtractor.Helpers
     {     
         public static int TileBlockSize = 64;
         public static int TileSize = 16;
-        public static int Cell_Size = 8;
-        public static int GridSize => TileSize * Cell_Size;
-        public static float TileSizeYrds = 533.333f;
-        public static float ChunkSize = TileSizeYrds / 16.0f;
+        public static int CellSize = 8;
+        public static float GridSize => TileSize * CellSize;
+        public static float TileSizeYrds = 533.33333F;
+        public static float ChunkSize = TileSizeYrds / TileSize;
         public static float UnitSize = ChunkSize / 8.0f;
+
+        /// <summary>
+        /// The Center of a map is it's origin
+        /// </summary>
+        public static float CenterPoint = (TileBlockSize / 2f) * TileSize;
     }
 }
