@@ -118,6 +118,7 @@
     <Compile Include="Generators\Extensions.cs" />
     <Compile Include="Generators\MapFilesGenerator.cs" />
     <Compile Include="Generators\TerrainMeshGenerator.cs" />
+    <Compile Include="Helpers\Configuration.cs" />
     <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\Enums.cs" />
     <Compile Include="Helpers\Extensions.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Core\MCNREntry.cs" />
     <Compile Include="Core\MCVTSubChunk.cs" />
     <Compile Include="Core\MTEXChunk.cs" />
+    <Compile Include="Helpers\Ini.cs" />
     <Compile Include="Helpers\Paths.cs" />
     <Compile Include="Log\Logger.cs" />
     <Compile Include="MPQ\DBCExtractor.cs" />
@@ -159,9 +161,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AlphaCoreLogo.ico" />
-    <Content Include="Config.txt">
+    <None Include="Config.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="MpqLIbLicense.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

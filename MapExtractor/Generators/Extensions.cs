@@ -71,8 +71,8 @@ namespace AlphaCoreExtractor.Generators
 
         public static float CalculateZ(this Cell cell, double cy, double cx)
         {
-            var x = (cy * Constants.TileSizeYrds) / ((double)Program.ZResolution - 1);
-            var y = (cx * Constants.TileSizeYrds) / ((double)Program.ZResolution - 1);
+            var x = (cy * Constants.TileSizeYrds) / ((double)Configuration.ZResolution - 1);
+            var y = (cx * Constants.TileSizeYrds) / ((double)Configuration.ZResolution - 1);
             return cell.GetZ(x, y);
         }
 

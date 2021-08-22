@@ -25,7 +25,7 @@ namespace AlphaCoreExtractor.MPQ
                 //Check if dbc.MPQ exist.
                 if(!File.Exists(Paths.DBCMPQPath))
                 {
-                    Logger.Error($"Unable to locate dbc.MPQ at path {Paths.DBCMPQPath}, please check Config.txt and set a proper installation path.");
+                    Logger.Error($"Unable to locate dbc.MPQ at path {Paths.DBCMPQPath}, please check Config.ini and set a proper installation path.");
                     return false;
                 }
 

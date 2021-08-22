@@ -32,7 +32,7 @@ namespace AlphaCoreExtractor.MPQ
 
                 if (!Directory.Exists(Paths.InputMapsPath))
                 {
-                    Logger.Error($"Unable to locate {Paths.InputMapsPath}, please check Config.txt and set a proper installation path.");
+                    Logger.Error($"Unable to locate {Paths.InputMapsPath}, please check Config.ini and set a proper installation path.");
                     return false;
                 }
 

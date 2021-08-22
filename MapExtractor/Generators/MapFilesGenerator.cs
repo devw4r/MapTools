@@ -162,8 +162,8 @@ namespace AlphaCoreExtractor.Generators
         private static void WriteHeightMap(BinaryWriter binaryWriter, CMapArea tileArea)
         {
             var cell = tileArea.TransformHeightData();
-            for (int cy = 0; cy < Program.ZResolution; cy++)
-                for (int cx = 0; cx < Program.ZResolution; cx++)
+            for (int cy = 0; cy < Configuration.ZResolution; cy++)
+                for (int cx = 0; cx < Configuration.ZResolution; cx++)
                     binaryWriter.Write(cell.CalculateZ(cy, cx));
         }
     }
