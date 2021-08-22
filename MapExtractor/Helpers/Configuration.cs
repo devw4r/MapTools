@@ -49,6 +49,8 @@ namespace AlphaCoreExtractor.Helpers
                     Logger.Error("Unable to read ZResolution from Config.ini.");
                 else if (int.TryParse(zResolution, out int zRes))
                     return zRes;
+                else
+                    Logger.Error("Unable to parse ZResolution from Config.ini.");
 
                 return 256;
             }
