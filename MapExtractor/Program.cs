@@ -24,9 +24,13 @@ namespace AlphaCoreExtractor
         private static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
         private static Thread MapsThread;
         private static volatile bool IsRunning = false;
+        public static int ZResolution = 256;
 
         static void Main(string[] args)
         {
+            if (args.Length > 0 && int.TryParse(args[0], out int zResolution))
+                ZResolution = zResolution;
+
             IsRunning = true;
             MapsThread = new Thread(new ThreadStart(StartProcess));
             MapsThread.Name = "MapsThread";
@@ -118,6 +122,7 @@ namespace AlphaCoreExtractor
             Console.WriteLine("TheAlphaProject");
             Console.WriteLine("Discord: https://discord.gg/RzBMAKU");
             Console.WriteLine("Github: https://github.com/The-Alpha-Project");
+            Console.WriteLine($"Using Z Resolution: {ZResolution}");
             Console.WriteLine();
         }
     }
