@@ -48,6 +48,15 @@ namespace AlphaCoreExtractor
 
             try
             {
+                if (!Configuration.Initialize())
+                {
+                    Logger.Error("Unable to read Config.ini, exiting...");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+
+                Console.WriteLine($"Using Z Resolution: {Configuration.ZResolution}");
+
                 // Extract Map.dbc and AreaTable.dbc
                 if (!DBCExtractor.ExtractDBC())
                 {
@@ -106,7 +115,6 @@ namespace AlphaCoreExtractor
                 IsRunning = false;
             }
         }
-
 
         public static void SetDefaultTitle()
         {

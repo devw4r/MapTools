@@ -2,10 +2,8 @@
 // Discord: https://discord.gg/RzBMAKU
 // Github:  https://github.com/The-Alpha-Project
 
-using AlphaCoreExtractor.Log;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace AlphaCoreExtractor.Helpers
@@ -109,7 +107,7 @@ namespace AlphaCoreExtractor.Helpers
                 if (!string.IsNullOrEmpty(_cachedWowPath))
                     return _cachedWowPath;
 
-                _cachedWowPath = File.ReadLines(@"Config.txt").First();
+                _cachedWowPath = Configuration.WoWPath;
 
                 if (IsLinux)
                     _cachedWowPath.Replace(@"\", "/");
