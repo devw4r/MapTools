@@ -50,7 +50,7 @@ namespace AlphaCoreExtractor.Helpers
                 else if (int.TryParse(zResolution, out int zRes))
                     return zRes;
                 else
-                    Logger.Error("Unable to parse ZResolution from Config.ini.");
+                    Logger.Warning("Unable to parse ZResolution from Config.ini, using default value of 256.");
 
                 return 256;
             }
