@@ -154,16 +154,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Config.ini.dist">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
+    <None Include="README.md" />
     <None Include="vanilla.alc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="AlphaCoreLogo.ico" />
-    <None Include="Config.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <Content Include="MpqLIbLicense.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
