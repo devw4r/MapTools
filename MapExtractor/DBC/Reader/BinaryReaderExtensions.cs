@@ -113,5 +113,16 @@ namespace AlphaCoreExtractor.DBC.Reader
             byte[] stringArray = br.ReadBytes(count);
             return Encoding.ASCII.GetString(stringArray);
         }
+
+        public static string ReadFixedString(this BinaryReader br, int size)
+        {
+            var bytes = br.ReadBytes(size);
+
+            for (int i = 0; i < size; i++)
+                if (bytes[i] == 0)
+                    return Encoding.ASCII.GetString(bytes, 0, i);
+
+            return Encoding.ASCII.GetString(bytes);
+        }
     }
 }

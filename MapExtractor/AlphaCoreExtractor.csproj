@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProjectGuid>{F0B5C925-F054-4BF4-874E-43B6F5CDC20C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>AlphaCoreExtractor</RootNamespace>
@@ -12,25 +12,6 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>Build\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>AlphaCoreLogo.ico</ApplicationIcon>
@@ -46,7 +27,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
+    <OutputPath>Build\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -54,6 +35,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -66,11 +48,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
+    <OutputPath>Build\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
@@ -85,28 +67,102 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\BinaryReaderProgress.cs" />
-    <Compile Include="Core\BitReader.cs" />
-    <Compile Include="Core\C3MCNRVector.cs" />
-    <Compile Include="Core\C3Vector.cs" />
-    <Compile Include="Core\C4Vector.cs" />
-    <Compile Include="Core\CAaBox.cs" />
-    <Compile Include="Core\CAaSphere.cs" />
-    <Compile Include="Core\Cell.cs" />
-    <Compile Include="Core\CImVector.cs" />
-    <Compile Include="Core\CMapArea.cs" />
-    <Compile Include="Core\CMapObj.cs" />
-    <Compile Include="Core\CRange.cs" />
-    <Compile Include="Core\MCSESubChunk.cs" />
-    <Compile Include="Core\MCLQSubChunk.cs" />
-    <Compile Include="Core\MCSHSubChunk.cs" />
-    <Compile Include="Core\SLTiles.cs" />
-    <Compile Include="Core\SLVert.cs" />
-    <Compile Include="Core\SMVert.cs" />
-    <Compile Include="Core\SOVert.cs" />
-    <Compile Include="Core\SWFlowv.cs" />
-    <Compile Include="Core\SWVert.cs" />
-    <Compile Include="Core\Vector.cs" />
+    <Compile Include="Core\Cache\StorageRoom.cs" />
+    <Compile Include="Core\Chunks\LiquidsHeightfield.cs" />
+    <Compile Include="Core\Mesh\MeshClipper.cs" />
+    <Compile Include="Core\Models\Cache\CacheManager.cs" />
+    <Compile Include="Core\Models\Cache\GeometryHolder.cs" />
+    <Compile Include="Core\Models\Chunks\ATCH.cs" />
+    <Compile Include="Core\Models\Chunks\BaseChunk.cs" />
+    <Compile Include="Core\Models\Chunks\BONE.cs" />
+    <Compile Include="Core\Models\Chunks\CAMS.cs" />
+    <Compile Include="Core\Models\Chunks\CLID.cs" />
+    <Compile Include="Core\Models\Chunks\EVTS.cs" />
+    <Compile Include="Core\Models\Chunks\GenObject.cs" />
+    <Compile Include="Core\Models\Chunks\GEOA.cs" />
+    <Compile Include="Core\Models\Chunks\GEOS.cs" />
+    <Compile Include="Core\Models\Chunks\GLBS.cs" />
+    <Compile Include="Core\Models\Chunks\HELP.cs" />
+    <Compile Include="Core\Models\Chunks\HTST.cs" />
+    <Compile Include="Core\Models\Chunks\LITE.cs" />
+    <Compile Include="Core\Models\MDX.cs" />
+    <Compile Include="Core\Models\Chunks\MODL.cs" />
+    <Compile Include="Core\Models\Chunks\MTLS.cs" />
+    <Compile Include="Core\Models\Chunks\PIVT.cs" />
+    <Compile Include="Core\Models\Chunks\PRE2.cs" />
+    <Compile Include="Core\Models\Chunks\RIBB.cs" />
+    <Compile Include="Core\Models\Chunks\SEQS.cs" />
+    <Compile Include="Core\Models\Chunks\SimpleTrack.cs" />
+    <Compile Include="Core\Models\Structures\CBox.cs" />
+    <Compile Include="Core\Models\Structures\CCylinder.cs" />
+    <Compile Include="Core\Models\Structures\CExtent.cs" />
+    <Compile Include="Core\Models\Structures\CPlane.cs" />
+    <Compile Include="Core\Models\Structures\CSphere.cs" />
+    <Compile Include="Core\Models\Structures\CVector2.cs" />
+    <Compile Include="Core\Models\Structures\CVector3.cs" />
+    <Compile Include="Core\Models\Structures\CVector4.cs" />
+    <Compile Include="Core\Models\Structures\CVertex.cs" />
+    <Compile Include="Core\Models\Chunks\TEXS.cs" />
+    <Compile Include="Core\Models\Chunks\Track.cs" />
+    <Compile Include="Core\Models\Chunks\TXAN.cs" />
+    <Compile Include="Core\Models\Chunks\VERS.cs" />
+    <Compile Include="Core\Readers\BinaryReaderProgress.cs" />
+    <Compile Include="Core\Readers\BitReader.cs" />
+    <Compile Include="Core\Structures\BoundingBoxcs.cs" />
+    <Compile Include="Core\Structures\BoundingSphere.cs" />
+    <Compile Include="Core\Structures\C2iVector.cs" />
+    <Compile Include="Core\Structures\C3MCNRVector.cs" />
+    <Compile Include="Core\Structures\C3Vector.cs" />
+    <Compile Include="Core\Structures\C4Vector.cs" />
+    <Compile Include="Core\Structures\CAaBox.cs" />
+    <Compile Include="Core\Structures\CAaSphere.cs" />
+    <Compile Include="Core\Structures\CImVector.cs" />
+    <Compile Include="Core\Structures\Color4.cs" />
+    <Compile Include="Core\Structures\Index3.cs" />
+    <Compile Include="Core\Structures\Matrix.cs" />
+    <Compile Include="Core\Structures\Plane.cs" />
+    <Compile Include="Core\Structures\Point.cs" />
+    <Compile Include="Core\Structures\Quaternion.cs" />
+    <Compile Include="Core\Structures\Ray.cs" />
+    <Compile Include="Core\Structures\Ray2D.cs" />
+    <Compile Include="Core\Structures\Rect.cs" />
+    <Compile Include="Core\Structures\Size.cs" />
+    <Compile Include="Core\Structures\Triangle.cs" />
+    <Compile Include="Core\Structures\Vector2.cs" />
+    <Compile Include="Core\Structures\Vector3.cs" />
+    <Compile Include="Core\Structures\Vector4.cs" />
+    <Compile Include="Core\Terrain\ADT.cs" />
+    <Compile Include="Core\Terrain\WDT.cs" />
+    <Compile Include="Core\Structures\CRange.cs" />
+    <Compile Include="Core\Chunks\MCSESubChunk.cs" />
+    <Compile Include="Core\Chunks\MCLQSubChunk.cs" />
+    <Compile Include="Core\Chunks\MCSHSubChunk.cs" />
+    <Compile Include="Core\Structures\SLTiles.cs" />
+    <Compile Include="Core\Structures\SLVert.cs" />
+    <Compile Include="Core\Structures\SMVert.cs" />
+    <Compile Include="Core\Structures\SOVert.cs" />
+    <Compile Include="Core\Structures\SWFlowv.cs" />
+    <Compile Include="Core\Structures\SWVert.cs" />
+    <Compile Include="Core\Structures\Vector.cs" />
+    <Compile Include="Core\WorldObject\Chunks\DoodadDefinition.cs" />
+    <Compile Include="Core\WorldObject\Chunks\WMOGroups\MOBA.cs" />
+    <Compile Include="Core\WorldObject\Chunks\WMOGroups\MOBN.cs" />
+    <Compile Include="Core\WorldObject\Chunks\WMOGroups\MOPY.cs" />
+    <Compile Include="Core\WorldObject\Structures\DoodadSet.cs" />
+    <Compile Include="Core\WorldObject\Enums.cs" />
+    <Compile Include="Core\WorldObject\Extensions.cs" />
+    <Compile Include="Core\WorldObject\Structures\Fog.cs" />
+    <Compile Include="Core\WorldObject\Chunks\FogInformation.cs" />
+    <Compile Include="Core\WorldObject\Chunks\GroupInformation.cs" />
+    <Compile Include="Core\WorldObject\Chunks\LightInformation.cs" />
+    <Compile Include="Core\WorldObject\Chunks\WMOGroups\LiquidInformation.cs" />
+    <Compile Include="Core\WorldObject\Structures\Material.cs" />
+    <Compile Include="Core\WorldObject\Structures\ObjectGroupHeader.cs" />
+    <Compile Include="Core\WorldObject\Structures\PortalInformation.cs" />
+    <Compile Include="Core\WorldObject\Structures\PortalRelation.cs" />
+    <Compile Include="Core\WorldObject\Structures\SMOGxBatch.cs" />
+    <Compile Include="Core\WorldObject\WMO.cs" />
+    <Compile Include="Core\WorldObject\WMOGroup.cs" />
     <Compile Include="DBC\DBCStorage.cs" />
     <Compile Include="DBC\Reader\BinaryReaderExtensions.cs" />
     <Compile Include="DBC\Reader\DBCHeader.cs" />
@@ -116,21 +172,23 @@
     <Compile Include="DBC\Structures\AreaTable_Vanilla.cs" />
     <Compile Include="DBC\Structures\DBCMap.cs" />
     <Compile Include="Generators\Extensions.cs" />
-    <Compile Include="Generators\MapFilesGenerator.cs" />
-    <Compile Include="Generators\TerrainMeshGenerator.cs" />
+    <Compile Include="Generators\DataGenerator.cs" />
+    <Compile Include="Generators\MeshGenerator.cs" />
     <Compile Include="Helpers\Configuration.cs" />
     <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\Enums.cs" />
     <Compile Include="Helpers\Extensions.cs" />
-    <Compile Include="Core\DataChunkHeader.cs" />
+    <Compile Include="Core\Readers\DataChunkHeader.cs" />
     <Compile Include="Helpers\Globals.cs" />
-    <Compile Include="Core\MCNREntry.cs" />
-    <Compile Include="Core\MCVTSubChunk.cs" />
-    <Compile Include="Core\MTEXChunk.cs" />
+    <Compile Include="Core\Chunks\MCNREntry.cs" />
+    <Compile Include="Core\Chunks\MCVTSubChunk.cs" />
+    <Compile Include="Core\Chunks\MTEXChunk.cs" />
     <Compile Include="Helpers\Ini.cs" />
+    <Compile Include="Helpers\MathHelper.cs" />
+    <Compile Include="Helpers\MathUtil.cs" />
     <Compile Include="Helpers\Paths.cs" />
     <Compile Include="Log\Logger.cs" />
-    <Compile Include="MPQ\DBCExtractor.cs" />
+    <Compile Include="MPQ\MPQExtractor.cs" />
     <Compile Include="MPQ\MpqLib\BitStream.cs" />
     <Compile Include="MPQ\MpqLib\MpqArchive.cs" />
     <Compile Include="MPQ\MpqLib\MpqEntry.cs" />
@@ -139,26 +197,34 @@
     <Compile Include="MPQ\MpqLib\MpqStream.cs" />
     <Compile Include="MPQ\MpqLib\MpqWavCompression.cs" />
     <Compile Include="MPQ\MpqLib\PKLibDecompress.cs" />
-    <Compile Include="MPQ\WDTExtractor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Core\SMAreaHeader.cs" />
-    <Compile Include="Core\SMAreaInfo.cs" />
-    <Compile Include="Core\SMChunk.cs" />
-    <Compile Include="Core\SMChunkInfo.cs" />
-    <Compile Include="Core\SMDoodadDef.cs" />
-    <Compile Include="Core\SMMapObjDef.cs" />
-    <Compile Include="Core\MCNRSubChunk.cs" />
-    <Compile Include="Core\SMOHeader.cs" />
+    <Compile Include="Core\Structures\SMAreaHeader.cs" />
+    <Compile Include="Core\Structures\SMAreaInfo.cs" />
+    <Compile Include="Core\Chunks\SMChunk.cs" />
+    <Compile Include="Core\Chunks\SMChunkInfo.cs" />
+    <Compile Include="Core\Chunks\MapDoodadDefinition.cs" />
+    <Compile Include="Core\Chunks\MapObjectDefinition.cs" />
+    <Compile Include="Core\Chunks\MCNRSubChunk.cs" />
+    <Compile Include="Core\Chunks\SMOHeader.cs" />
     <Compile Include="Helpers\Tokens.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Config.ini.dist">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="NoCollision.cache">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <None Include="README.md" />
+    <None Include="recast\AlphaCoreRecastLinux">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="recast\README.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="vanilla.alc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -168,6 +234,14 @@
     <Content Include="MpqLIbLicense.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="recast\AlphaCoreRecast.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

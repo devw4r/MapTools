@@ -1,3 +1,28 @@
 [Configuration]
+;WoWPath=/home/user/.wine/drive_c/Program Files (x86)/World of Warcraft/
 WoWPath=C:\Program Files (x86)\World of Warcraft
-ZResolution=256
+
+; Either 64 (low) or 256 (high)
+ZResolution=256 
+
+; Generate .map files?
+GenerateMaps=1
+
+; Generate .nav files?
+GenerateNavs=0
+
+; Generate .obj files?
+GenerateObjs=0
+
+; Parse options for mesh/obj generation.
+; 0 Just Terrain
+; 1 Terrain+WMO 
+; 2 Terrain+WMO+MDX
+ParseSelection=0
+
+; Developer only.
+; Generate no collision mdx cache.
+; Generate all MDX in-world placement information (Map, X, Y, Z).
+GenNoCollision=0
+GenerateMdxPlacement=0
+
