@@ -20,7 +20,7 @@ namespace AlphaCoreExtractor.Core.Structures
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             if (obj.GetType() != typeof(Index3)) return false;
             return Equals((Index3)obj);
         }

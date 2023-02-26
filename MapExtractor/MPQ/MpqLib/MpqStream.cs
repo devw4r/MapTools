@@ -45,10 +45,10 @@ namespace MpqLib
     /// </summary>
     public class MpqStream : Stream
     {
-        private Stream _stream;
-        private int _blockSize;
+        private readonly Stream _stream;
+        private readonly int _blockSize;
 
-        private MpqEntry _entry;
+        private readonly MpqEntry _entry;
         private uint[] _blockPositions;
 
         private long _position;

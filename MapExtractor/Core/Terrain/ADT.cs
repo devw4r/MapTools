@@ -14,6 +14,7 @@ using AlphaCoreExtractor.Core.Readers;
 using AlphaCoreExtractor.DBC.Structures;
 using AlphaCoreExtractor.Core.Structures;
 using AlphaCoreExtractor.Core.WorldObject;
+using AlphaCoreExtractor.Generators;
 
 namespace AlphaCoreExtractor.Core.Terrain
 {
@@ -107,7 +108,7 @@ namespace AlphaCoreExtractor.Core.Terrain
         /// </summary>
         private DataChunkHeader DataChunkHeader;
 
-        public ADT(uint offset, WDT terrainterrainReader, DataChunkHeader dataChunkHeader, uint tileX, uint tileY)
+        public ADT(uint offset, WDT terrainReader, DataChunkHeader dataChunkHeader, uint tileX, uint tileY)
         {
             TileX = tileX;
             TileY = tileY;
@@ -115,28 +116,28 @@ namespace AlphaCoreExtractor.Core.Terrain
             DataChunkHeader = dataChunkHeader;
 
             // MHDR offset
-            terrainterrainReader.SetPosition(offset);
+            terrainReader.SetPosition(offset);
 
             // AreaHeader
-            if (!BuildAreaHeader(terrainterrainReader))
+            if (!BuildAreaHeader(terrainReader))
                 return;
 
             // MCIN, 256 Entries, so a 16*16 Chunkmap.
-            if (!BuildMCIN(terrainterrainReader))
+            if (!BuildMCIN(terrainReader))
                 return;
 
             // MTEX, List of textures used for texturing the terrain in this map tile.
-            if (!BuildMTEX(terrainterrainReader))
+            if (!BuildMTEX(terrainReader))
                 return;
 
             // MDDF, Placement information for doodads (MDX models)
             // Additional to this, the models to render are referenced in each MCRF chunk.
-            if (!BuildMDDF(terrainterrainReader))
+            if (!BuildMDDF(terrainReader))
                 return;
 
             // MODF, Placement information for WMOs.
             // Additional to this, the WMOs to render are referenced in each MCRF chunk.
-            if (!BuildMODF(terrainterrainReader))
+            if (!BuildMODF(terrainReader))
                 return;
 
             // The MCNK chunks have a large block of data that starts with a header, and then has sub-chunks of its own.
@@ -144,7 +145,7 @@ namespace AlphaCoreExtractor.Core.Terrain
             // a shadow map, etc.
             // MCNK, The header is 128 bytes like later versions, but information inside is placed slightly differently.
             // Offsets are relative to the end of MCNK header.
-            if (!BuildMCNK(terrainterrainReader))
+            if (!BuildMCNK(terrainReader))
                 return;
 
             // Liquids transformed heightmap given 127 resolution.
@@ -153,14 +154,14 @@ namespace AlphaCoreExtractor.Core.Terrain
             // Load related WMOs.
             if (Configuration.ShouldParseWMOs)
                 foreach (MapObjectDefinition objectDefinition in ObjectDefinitions.Values)
-                    if (terrainterrainReader.LoadWMO(objectDefinition, out WMO wmo))
+                    if (terrainReader.LoadWMO(objectDefinition, out WMO wmo))
                         WMOs.Add(wmo);
 
             // Load related MDXs.
             if(Configuration.ShouldParseMDXs)
                 foreach (MapDoodadDefinition modelDefinition in DoodadDefinitions.Values)
                     if (modelDefinition.Exists)
-                        if (terrainterrainReader.LoadMDX(modelDefinition, out MDX mdx))
+                        if (terrainReader.LoadMDX(modelDefinition, out MDX mdx))
                             MDXs.Add(mdx);
 
             Errors = false;
@@ -319,8 +320,7 @@ namespace AlphaCoreExtractor.Core.Terrain
             // Flush all MCVT chunks on all tiles.
             for (int x = 0; x < Constants.TileSize; x++)
                 for (int y = 0; y < Constants.TileSize; y++)
-                    if (Tiles[x, y] != null)
-                        Tiles[x, y].MCVTSubChunk?.Flush();
+                    Tiles[x, y]?.MCVTSubChunk?.Flush();
 
             return _heightMap;
         }
@@ -348,6 +348,11 @@ namespace AlphaCoreExtractor.Core.Terrain
         }
         #endregion
 
+        public void WriteFiles(WDT wdt)
+        {
+            DataGenerator.WriteADTFiles(wdt, this);
+        }
+
         public void Dispose()
         {
             AreaHeader = null;
@@ -371,7 +376,7 @@ namespace AlphaCoreExtractor.Core.Terrain
             MDXs = null;
 
             foreach (var tile in Tiles)
-                tile.Dispose();
+                tile?.Dispose();
             Tiles = null;
 
             DataChunkHeader = null;

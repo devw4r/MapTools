@@ -58,7 +58,7 @@ namespace AlphaCoreExtractor.Core.WorldObject
         /// <summary>
         /// Used to read file tokens and validate chunks.
         /// </summary>
-        private DataChunkHeader DataChunkHeader = new DataChunkHeader();
+        private readonly DataChunkHeader DataChunkHeader = new DataChunkHeader();
 
         public WMOGroup(BinaryReaderProgress br)
         {

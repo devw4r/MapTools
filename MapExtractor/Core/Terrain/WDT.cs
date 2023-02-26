@@ -61,17 +61,7 @@ namespace AlphaCoreExtractor.Core.Terrain
         /// Each name points to a .wmo file.
         /// </summary>
         public List<string> WmoFiles = new List<string>();
-
-        /// <summary>
-        /// MDX's used by this terrain. TODO
-        /// </summary>
-        /// public readonly Dictionary<string, MDX> MDxs = new Dictionary<string, MDX>();
-        
-        /// <summary>
-        /// WMO's used by this terrain.
-        /// </summary>
-        public Dictionary<string, WMO> WMOs = new Dictionary<string, WMO>();
-
+       
         /// <summary>
         /// Only one instance is possible. It is usually used by WMO based maps which contain no ADT parts with the exception of RazorfenDowns.
         /// If this chunk exists, the client marks the map as a dungeon and uses absolute positioning for lights.
@@ -114,6 +104,7 @@ namespace AlphaCoreExtractor.Core.Terrain
 
             this.OnRead += OnBytesRead;
             LoadData();
+            GC.Collect();
         }
 
         
@@ -175,7 +166,6 @@ namespace AlphaCoreExtractor.Core.Terrain
                 Logger.Info($"WMO references (.wmo): {WmoFiles.Count}");
                 Logger.Info($"Usable Tiles: {UsableTiles}");
                 Logger.Info($"UnUsable Tiles: {UnUsableTiles}");
-                PrintTileBlockInformation(DBCMap.ID);
             }
 
             Logger.Success("Map information loaded successfully.");
@@ -199,20 +189,21 @@ namespace AlphaCoreExtractor.Core.Terrain
                         // Do we have data for this Tile?
                         if (tileBlock != null & tileBlock.size > 0)
                         {
-                            // Tile should not be already occupied.
-                            if (TileBlocks[x, y] != null)
-                                throw new Exception("Invalid tile location.");
-
-                            var mapArea = new ADT(tileBlock.offset, this, DataChunkHeader, x, y);
-
-                            if (mapArea.Errors)
+                            using (ADT adt = new ADT(tileBlock.offset, this, DataChunkHeader, x, y))
                             {
-                                Logger.Warning($"[WARNING] Unable to load information for tile {x},{y}");
-                                continue;
+                                if (adt.Errors)
+                                {
+                                    Logger.Warning($"[WARNING] Unable to load information for tile {x},{y}");
+                                    continue;
+                                }
+                                else
+                                {
+                                    UsableTiles++;
+                                    adt.WriteFiles(this);
+                                }
                             }
 
-                            UsableTiles++;
-                            TileBlocks[x, y] = mapArea;
+                            GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized, false);
                         }
                     }
                 }
@@ -394,22 +385,6 @@ namespace AlphaCoreExtractor.Core.Terrain
             return false;
         }
 
-        public void PrintTileBlockInformation(uint mapID)
-        {
-            for (int x = 0; x < Constants.TileBlockSize; x++)
-            {
-                for (int y = 0; y < Constants.TileBlockSize; y++)
-                {
-                    if (TileBlocks[x, y] != null)
-                    {
-                        Logger.Notice($"Tile: {Name}_{x}_{y}");
-                        foreach (var areaName in TileBlocks[x, y].GetAreaNames(mapID))
-                            Logger.Info($" {areaName}");
-                    }
-                }
-            }
-        }
-
         public bool LoadMDX(MapDoodadDefinition doodadDefinition, out MDX mdx)
         {
             mdx = null;
@@ -483,8 +458,6 @@ namespace AlphaCoreExtractor.Core.Terrain
             MODF = null;
             TileBlocks = null;
             DataChunkHeader = null;
-            WMOs?.Clear();
-            WMOs = null;
 
             base.Dispose(disposing);
         }

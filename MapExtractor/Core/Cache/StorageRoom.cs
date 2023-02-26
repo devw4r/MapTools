@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
+﻿// TheAlphaProject
+// Discord: https://discord.gg/RzBMAKU
+// Github:  https://github.com/The-Alpha-Project
+// MDXParser bt barncastle: https://github.com/barncastle/MDX-Parser
+
+using System.Collections.Concurrent;
 using AlphaCoreExtractor.Core.Structures;
 
 namespace AlphaCoreExtractor.Core.Cache
 {
     public static class StorageRoom
     {
-        private static Queue<Vector3> VectorCache = new Queue<Vector3>();
-        private static HashSet<Vector3> HashSet = new HashSet<Vector3>();
+        private static readonly ConcurrentQueue<Vector3> VectorCache = new ConcurrentQueue<Vector3>();
+        private static readonly ConcurrentHashSet<Vector3> HashSet = new ConcurrentHashSet<Vector3>();
         public static void PushVector3(Vector3 vector)
         {
-            if (VectorCache.Count > 400000)
+            if (VectorCache.Count > 100000)
                 return;
 
             if (!HashSet.Contains(vector))
@@ -21,9 +26,8 @@ namespace AlphaCoreExtractor.Core.Cache
 
         public static Vector3 PopVector3()
         {
-            if (VectorCache.Count > 0)
+            if (VectorCache.Count > 0 && VectorCache.TryDequeue(out Vector3 vector))
             {
-                var vector = VectorCache.Dequeue();
                 HashSet.Remove(vector);
                 return vector;
             }
@@ -33,9 +37,8 @@ namespace AlphaCoreExtractor.Core.Cache
 
         public static Vector3 PopVector3(float x, float y, float z)
         {
-            if(VectorCache.Count > 0)
+            if(VectorCache.Count > 0 && VectorCache.TryDequeue(out Vector3 vector))
             {
-                var vector = VectorCache.Dequeue();
                 HashSet.Remove(vector);
                 vector.Set(x, y, z);
                 return vector;

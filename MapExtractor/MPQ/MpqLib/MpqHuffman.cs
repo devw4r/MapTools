@@ -311,13 +311,17 @@ namespace MpqLib
 			LinkedNode parent = tail;
 			LinkedNode result = tail.Prev; // This will be the new tail after the tree is updated
 
-			LinkedNode temp = new LinkedNode(parent.DecompressedValue, parent.Weight);
-			temp.Parent = parent;
+            LinkedNode temp = new LinkedNode(parent.DecompressedValue, parent.Weight)
+            {
+                Parent = parent
+            };
 
-			LinkedNode newnode = new LinkedNode(decomp, 0);
-			newnode.Parent = parent;
+            LinkedNode newnode = new LinkedNode(decomp, 0)
+            {
+                Parent = parent
+            };
 
-			parent.Child0 = newnode;
+            parent.Child0 = newnode;
 
 			tail.Next = temp;
 			temp.Prev = tail;

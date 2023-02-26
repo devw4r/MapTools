@@ -10,7 +10,7 @@ namespace AlphaCoreExtractor.Log
     public static class Logger
     {
         private static readonly object _writeLock = new object();
-        private static Stopwatch ProgressRate = new Stopwatch();
+        private static readonly Stopwatch ProgressRate = new Stopwatch();
 
         public static void Info(string message)
         {

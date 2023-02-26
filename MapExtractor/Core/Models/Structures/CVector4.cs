@@ -31,7 +31,7 @@ namespace AlphaCoreExtractor.Core.Models.Structures
         {
             const double multiplier = 0.00000095367432;
 
-            Func<double, float> DoubleToFloat = (d) => Math.Max(Math.Min((float)d, float.MaxValue), float.MinValue); //Prevent infinity
+            float DoubleToFloat(double d) => Math.Max(Math.Min((float)d, float.MaxValue), float.MinValue); //Prevent infinity
 
             long value = br.ReadInt64();
 

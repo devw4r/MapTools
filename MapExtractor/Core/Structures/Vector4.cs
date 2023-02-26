@@ -168,7 +168,7 @@ namespace AlphaCoreExtractor.Core.Structures
         /// <returns>true if the object is <see cref="Vector4" /> and is equal; false otherwise</returns>
         public override bool Equals(object obj)
         {
-            return obj is Vector4 && Equals((Vector4)obj);
+            return obj is Vector4 vector && Equals(vector);
         }
 
         public override int GetHashCode()

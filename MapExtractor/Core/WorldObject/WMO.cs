@@ -4,19 +4,20 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.Core.Cache;
 using AlphaCoreExtractor.Core.Models;
 using AlphaCoreExtractor.Core.Chunks;
 using AlphaCoreExtractor.Core.Readers;
-using AlphaCoreExtractor.Helpers.Enums;
 using AlphaCoreExtractor.Core.Structures;
 using AlphaCoreExtractor.Core.Models.Cache;
 using AlphaCoreExtractor.Core.WorldObject.Chunks;
 using AlphaCoreExtractor.Core.WorldObject.Structures;
-using AlphaCoreExtractor.Core.Cache;
+
 
 namespace AlphaCoreExtractor.Core.WorldObject
 {
@@ -144,7 +145,7 @@ namespace AlphaCoreExtractor.Core.WorldObject
             if (!ReadMOMO())
                 return;
 
-            // Header for the map object. 64 bytes.
+            // Header for the map header. 64 bytes.
             if (!ReadMOHD())
                 return;
 
@@ -204,6 +205,8 @@ namespace AlphaCoreExtractor.Core.WorldObject
             if (!ReadMOGP())
                 return;
 
+            if (Groups.Any(g => g.LiquidInformation.Count() > 0))
+                Console.Write("");
             // Mesh related, internal.
             if (Configuration.ShouldParseWMOs)
                 TransformWMO(objectDefinition);
@@ -230,8 +233,8 @@ namespace AlphaCoreExtractor.Core.WorldObject
                 else
                     Logger.Error($"Invalid index {index} into DoodadSet array with id {doodadSet}");
             }
-         
-            if(Configuration.ShouldParseMDXs)
+
+            if (Configuration.ShouldParseMDXs)
             {
                 var mdxList = new List<MDX>();
                 foreach (var def in doodadSets)
@@ -282,7 +285,7 @@ namespace AlphaCoreExtractor.Core.WorldObject
                 }
                 WMOMDXs = mdxList.ToArray();
             }
-          
+
             // Rotate the WMO's to the new orientation
             var position = objectDefinition.Position;
             var posX = (position.x - Constants.CenterPoint) * -1;
@@ -348,7 +351,7 @@ namespace AlphaCoreExtractor.Core.WorldObject
                     WmoIndices.Add(newIndex);
 
                     // Liquids
-                    //if(wmoGroup.LiquidInformation.Count > 0)
+                    //if (wmoGroup.LiquidInformation.Count > 0)
                     //{
                     //    var liqInfo = wmoGroup.LiquidInformation[0];
                     //    var liqOrigin = liqInfo.BaseCoordinates;
