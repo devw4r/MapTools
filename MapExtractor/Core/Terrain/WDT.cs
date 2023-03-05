@@ -183,6 +183,8 @@ namespace AlphaCoreExtractor.Core.Terrain
 
                 for (uint x = 0; x < Constants.TileBlockSize; x++)
                 {
+                    if (x != 48)
+                        continue;
                     for (uint y = 0; y < Constants.TileBlockSize; y++)
                     {
                         var tileBlock = TileBlocksInformation[x, y];
