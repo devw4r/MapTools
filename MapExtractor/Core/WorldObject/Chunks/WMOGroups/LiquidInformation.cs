@@ -75,25 +75,24 @@ namespace AlphaCoreExtractor.Core.WorldObject.Chunks.WMOGroups
             BaseCoordinates = Vector3.FromReader(br);
             MaterialId = br.ReadUInt16();
 
-            HeightMapMax = new float[XVertexCount, YVertexCount];
-            HeightMapMin = new float[XVertexCount, YVertexCount];
+            HeightMapMax = new float[YVertexCount, XVertexCount];
+            HeightMapMin = new float[YVertexCount, XVertexCount];
 
             for (var y = 0; y < YVertexCount; y++)
             {
                 for (var x = 0; x < XVertexCount; x++)
                 {
-                    // The first value is never used ...
-                    HeightMapMin[x, y] = br.ReadSingle();
-                    HeightMapMax[x, y] = br.ReadSingle();
+                    HeightMapMin[y, x] = br.ReadSingle();
+                    HeightMapMax[y, x] = br.ReadSingle();
                 }
             }
 
-            LiquidTileFlags = new byte[XTileCount, YTileCount];
+            LiquidTileFlags = new byte[YTileCount, XTileCount];
             for (var y = 0; y < YTileCount; y++)
             {
                 for (var x = 0; x < XTileCount; x++)
                 {
-                    LiquidTileFlags[x, y] = br.ReadByte();
+                    LiquidTileFlags[y, x] = br.ReadByte();
                 }
             }
         }

@@ -6,7 +6,7 @@ using System;
 
 namespace AlphaCoreExtractor.Core.Chunks
 {
-    public class LiquidsHeightmap : IDisposable
+    public class TerrainHeightMap : IDisposable
     {
         public float[,] V9 = new float[16 * 8 + 1, 16 * 8 + 1];
         public float[,] V8 = new float[16 * 8, 16 * 8];

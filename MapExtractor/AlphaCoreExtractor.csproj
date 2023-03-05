@@ -100,7 +100,7 @@
   <ItemGroup>
     <Compile Include="Core\Cache\ConcurrentHashSet.cs" />
     <Compile Include="Core\Cache\StorageRoom.cs" />
-    <Compile Include="Core\Chunks\LiquidsHeightfield.cs" />
+    <Compile Include="Core\Chunks\TerrainHeightField.cs" />
     <Compile Include="Core\Mesh\MeshClipper.cs" />
     <Compile Include="Core\Models\Cache\CacheManager.cs" />
     <Compile Include="Core\Models\Cache\GeometryHolder.cs" />

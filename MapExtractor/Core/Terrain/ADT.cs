@@ -86,7 +86,7 @@ namespace AlphaCoreExtractor.Core.Terrain
         /// <summary>
         /// Liquids transformed heightmap given 127 resolution.
         /// </summary>
-        public LiquidsHeightmap LiquidsHeightmap;
+        public TerrainHeightMap TerrainHeightMap;
 
         /// <summary>
         /// WMO's used in this ADT.
@@ -148,13 +148,13 @@ namespace AlphaCoreExtractor.Core.Terrain
             if (!BuildMCNK(terrainReader))
                 return;
 
-            // Liquids transformed heightmap given 127 resolution.
-            LiquidsHeightmap = BuildLiquidsHeightmap();
+            // Terrain transformed heightmap given resolution.
+            TerrainHeightMap = BuildTerrainHeightMap();
 
             // Load related WMOs.
             if (Configuration.ShouldParseWMOs)
                 foreach (MapObjectDefinition objectDefinition in ObjectDefinitions.Values)
-                    if (terrainReader.LoadWMO(objectDefinition, out WMO wmo))
+                    if (terrainReader.LoadWMO(objectDefinition, this, out WMO wmo))
                         WMOs.Add(wmo);
 
             // Load related MDXs.
@@ -299,9 +299,9 @@ namespace AlphaCoreExtractor.Core.Terrain
             return false;
         }
 
-        private LiquidsHeightmap BuildLiquidsHeightmap()
+        private TerrainHeightMap BuildTerrainHeightMap()
         {
-            LiquidsHeightmap _heightMap = new LiquidsHeightmap();
+            TerrainHeightMap _heightMap = new TerrainHeightMap();
 
             for (int x = 0; x < 128; x++)
             {
@@ -362,8 +362,8 @@ namespace AlphaCoreExtractor.Core.Terrain
             ObjectDefinitions?.Clear();
             ObjectDefinitions = null;
             TilesInformation = null;
-            LiquidsHeightmap?.Dispose();
-            LiquidsHeightmap = null;
+            TerrainHeightMap?.Dispose();
+            TerrainHeightMap = null;
 
             foreach (var wmo in WMOs)
                 wmo?.Dispose();

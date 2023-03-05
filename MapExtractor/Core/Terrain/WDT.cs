@@ -183,13 +183,8 @@ namespace AlphaCoreExtractor.Core.Terrain
 
                 for (uint x = 0; x < Constants.TileBlockSize; x++)
                 {
-                    if (x != 48)
-                        continue;
                     for (uint y = 0; y < Constants.TileBlockSize; y++)
                     {
-                        if (y != 31)
-                            continue;
-
                         var tileBlock = TileBlocksInformation[x, y];
                         // Do we have data for this Tile?
                         if (tileBlock != null & tileBlock.size > 0)
@@ -433,12 +428,12 @@ namespace AlphaCoreExtractor.Core.Terrain
             return false;
         }
 
-        public bool LoadWMO(MapObjectDefinition objectDefinition, out WMO wmo)
+        public bool LoadWMO(MapObjectDefinition objectDefinition, ADT adt, out WMO wmo)
         {
             wmo = null;
             try
             {
-                wmo = new WMO(objectDefinition.FilePath.ToLocalPath(), objectDefinition);
+                wmo = new WMO(objectDefinition.FilePath.ToLocalPath(), objectDefinition, adt);
                 return true;
             }
             catch (Exception ex)

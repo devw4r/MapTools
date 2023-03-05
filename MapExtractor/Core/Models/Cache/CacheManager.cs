@@ -5,11 +5,11 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
-using System.Linq;
 
 namespace AlphaCoreExtractor.Core.Models.Cache
 {

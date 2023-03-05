@@ -55,7 +55,7 @@ namespace AlphaCoreExtractor.Generators
             vertex.CoordsType = CoordinatesType.WoW;
         }
 
-        public static float CalculateZ(this LiquidsHeightmap lHeightMap, double cy, double cx)
+        public static float CalculateZ(this TerrainHeightMap lHeightMap, double cy, double cx)
         {
             var x = (cy * Constants.TileSizeYrds) / ((double)Configuration.ZResolution - 1);
             var y = (cx * Constants.TileSizeYrds) / ((double)Configuration.ZResolution - 1);
@@ -64,7 +64,7 @@ namespace AlphaCoreExtractor.Generators
 
         private static Vector<double>[] v = new Vector<double>[3] { new Vector<double>(), new Vector<double>(), new Vector<double>() };
         private static Vector<double> p = new Vector<double>();
-        private static float GetZ(this LiquidsHeightmap lHeightMap, double x, double z)
+        private static float GetZ(this TerrainHeightMap lHeightMap, double x, double z)
         {
             // Find out quadrant
             int xc = (int)(x / Constants.UnitSize);

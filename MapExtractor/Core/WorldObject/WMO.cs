@@ -4,11 +4,12 @@
 
 using System;
 using System.IO;
-using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.Generators;
 using AlphaCoreExtractor.Core.Cache;
 using AlphaCoreExtractor.Core.Models;
 using AlphaCoreExtractor.Core.Chunks;
@@ -18,7 +19,7 @@ using AlphaCoreExtractor.Core.Structures;
 using AlphaCoreExtractor.Core.Models.Cache;
 using AlphaCoreExtractor.Core.WorldObject.Chunks;
 using AlphaCoreExtractor.Core.WorldObject.Structures;
-using AlphaCoreExtractor.Core.WorldObject.Chunks.WMOGroups;
+using System.Diagnostics;
 
 namespace AlphaCoreExtractor.Core.WorldObject
 {
@@ -136,7 +137,7 @@ namespace AlphaCoreExtractor.Core.WorldObject
         /// </summary>
         private DataChunkHeader DataChunkHeader = new DataChunkHeader();
 
-        public WMO(string filePath, MapObjectDefinition objectDefinition) : base(new MemoryStream(File.ReadAllBytes(filePath)))
+        public WMO(string filePath, MapObjectDefinition objectDefinition, ADT adt) : base(new MemoryStream(File.ReadAllBytes(filePath)))
         {
             // Version
             if (!ReadMVER())
@@ -208,13 +209,17 @@ namespace AlphaCoreExtractor.Core.WorldObject
 
             // Mesh related, internal.
             if (Configuration.ShouldParseWMOs)
-                TransformWMO(objectDefinition);
+            {
+                TransformWMO(objectDefinition, adt);
+
+                GC.Collect();
+            }
         }
 
         /// <summary>
         /// Transform geometry to their in-game final placement.
         /// </summary>
-        private void TransformWMO(MapObjectDefinition objectDefinition)
+        private void TransformWMO(MapObjectDefinition objectDefinition, ADT adt)
         {
             ClearCollision();
 
@@ -353,35 +358,72 @@ namespace AlphaCoreExtractor.Core.WorldObject
                         WmoIndices.Add(newIndex);
 
                         // Liquids
-                        //if (wmoGroup.LiquidInformation.Count > 0)
-                        //{
-                        //    var liqInfo = wmoGroup.LiquidInformation[0];
-                        //    var liqBasePos = liqInfo.BaseCoordinates;
+                        if (wmoGroup.LiquidInformation.Count > 0)
+                        {
+                            var tileSize = Constants.UnitSize;
+                            var liquidChunk = wmoGroup.LiquidInformation[0];
+                            var baseVector = Vector3.Transform(liquidChunk.BaseCoordinates, rotateZ) + originVec;
 
-                        //    offset = this.WmoLiquidVertices.Count;
-                        //    for (var y = 0; y < liqInfo.YVertexCount; y++)
-                        //    {
-                        //        for (var x = 0; x < liqInfo.XVertexCount; x++)
-                        //        {
-                        //            var v1 = StorageRoom.PopVector3((x + 0) * Constants.UnitSize + liqBasePos.X, (y + 0) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
-                        //            var v2 = StorageRoom.PopVector3((x + 1) * Constants.UnitSize + liqBasePos.X, (y + 0) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
-                        //            var v3 = StorageRoom.PopVector3((x + 0) * Constants.UnitSize + liqBasePos.X, (y + 1) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
-                        //            var v4 = StorageRoom.PopVector3((x + 1) * Constants.UnitSize + liqBasePos.X, (y + 1) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
+                            for (var y = 0; y < liquidChunk.YTileCount; y++) // Height
+                            {
+                                for (var x = 0; x < liquidChunk.XTileCount; x++) // Width
+                                {
+                                    var flag = liquidChunk.LiquidTileFlags[y, x];
+                                    if (flag == 15) // Do not render.
+                                        continue;
 
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v1, rotateZ) + originVec);
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v2, rotateZ) + originVec);
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v3, rotateZ) + originVec);
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v4, rotateZ) + originVec);
+                                    var v1 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 0)), baseVector.Y + (-1 * tileSize * (y + 0)), baseVector.Z);
+                                    var v2 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 1)), baseVector.Y + (-1 * tileSize * (y + 0)), baseVector.Z);
+                                    var v3 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 0)), baseVector.Y + (-1 * tileSize * (y + 1)), baseVector.Z);
+                                    var v4 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 1)), baseVector.Y + (-1 * tileSize * (y + 1)), baseVector.Z);
 
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 4);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 3);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 2);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 2);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 3);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 1);
-                        //        }
-                        //    }
-                        //}
+                                    //v1 = Vector3.Transform(v1, rotateZ) + originVec;
+                                    //v2 = Vector3.Transform(v2, rotateZ) + originVec;
+                                    //v3 = Vector3.Transform(v3, rotateZ) + originVec;
+                                    //v4 = Vector3.Transform(v4, rotateZ) + originVec;
+
+                                    var port = $".port {v1.X} {v1.Y} {v1.Z} 0";
+                                    if (!DataGenerator.Ports.Contains(port))
+                                        DataGenerator.Ports.Add(port);
+                                    else
+                                        continue;
+                                
+                                    WmoLiquidVertices.Add(v1);
+                                    WmoLiquidVertices.Add(v2);
+                                    WmoLiquidVertices.Add(v3);
+                                    WmoLiquidVertices.Add(v4);
+
+                                    //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 4);
+                                    //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 3);
+                                    //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 2);
+                                    //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 2);
+                                    //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 3);
+                                    //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 1);
+
+                                    foreach (var v in WmoLiquidVertices)
+                                    {
+                                        port = $".port {v.X} {v.Y} {v.Z} 0";
+                                        var adt_x = (int)(32.0 - (v.X / Constants.TileSizeYrds));
+                                        var adt_y = (int)(32.0 - (v.Y / Constants.TileSizeYrds));
+                                        var tile_x = (int)(127 * (32.0 - (v.X / Constants.TileSizeYrds) - (adt_x)));
+                                        var tile_y = (int)(127 * (32.0 - (v.Y / Constants.TileSizeYrds) - (adt_y)));
+
+                                        if (!DataGenerator.GlobalWMOLiquids.ContainsKey(adt_x))
+                                            DataGenerator.GlobalWMOLiquids.Add(adt_x, new Dictionary<int, float[,]>());
+                                        if (!DataGenerator.GlobalWMOLiquids[adt_x].ContainsKey(adt_y))
+                                            DataGenerator.GlobalWMOLiquids[adt_x].Add(adt_y, new float[128, 128]);
+
+                                        DataGenerator.GlobalWMOLiquids[adt_x][adt_y][tile_y, tile_x] = v.Z;
+
+                                        //Debug.WriteLine($"{tile_x},{tile_y}");
+                                        //Debug.WriteLine(port);
+                                    }
+
+                                    WmoLiquidVertices.Clear();
+
+                                }
+                            }
+                        }
                     }
 
                     // Rotate the MDX's to the new orientation
@@ -404,8 +446,6 @@ namespace AlphaCoreExtractor.Core.WorldObject
                         }
                     }
                 }
-
-                GC.Collect();
             }
         }
 

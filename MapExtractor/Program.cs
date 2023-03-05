@@ -119,8 +119,13 @@ namespace AlphaCoreExtractor
 
                 //Begin parsing adt files and generate .map files.
                 foreach (var entry in WDTFiles)
+                {
                     using (WDT map = new WDT(entry.Key, entry.Value)) // Key:DbcMap Value:FilePath
+                    {
+                        DataGenerator.WriteWMOLiquids(map.MapID);
                         Logger.Success($"Finished processing {map.Name}.");
+                    }
+                }
 
                 WDTFiles?.Clear();
                 Console.WriteLine();
