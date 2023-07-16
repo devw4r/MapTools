@@ -14,7 +14,7 @@ namespace AlphaCoreExtractor.Core.Models.Chunks
 {
     public class EVTS : BaseChunk, IReadOnlyCollection<Event>
     {
-        readonly Event[] Events;
+        Event[] Events;
 
         public EVTS(BinaryReader br, uint version) : base(br)
         {

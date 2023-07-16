@@ -40,7 +40,7 @@ namespace AlphaCoreExtractor.Core.Chunks
         public uint nSndEmitters;
         public uint offsLiquid;
         public byte[] unused = new byte[24];
-        private readonly long HeaderOffsetEnd = 0;
+        private long HeaderOffsetEnd = 0;
 
         public bool HasLiquids = false;
 

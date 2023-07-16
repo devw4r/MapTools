@@ -15,7 +15,7 @@ namespace AlphaCoreExtractor.Core.Models.Cache
 {
     public static class CacheManager
     {
-        private static readonly Dictionary<string, GeometryHolder> MDXCollisionCache = new Dictionary<string, GeometryHolder>();
+        private static Dictionary<string, GeometryHolder> MDXCollisionCache = new Dictionary<string, GeometryHolder>();
         private static HashSet<string> NoCollisionMDX = new HashSet<string>();
         private static bool Initialized = false;
         public static bool ShouldLoad(string filePath)

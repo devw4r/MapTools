@@ -14,10 +14,13 @@ namespace AlphaCoreExtractor.Core.Models.Chunks
 {
     public class PIVT : BaseChunk, IReadOnlyCollection<CVector3>
     {
-        readonly CVector3[] PivotPoints;
+        CVector3[] PivotPoints;
 
         public PIVT(BinaryReader br, uint version) : base(br)
 		{
+            br.BaseStream.Position += Size;
+            return;
+
             PivotPoints = new CVector3[Size / 0xC];
             for (int i = 0; i < PivotPoints.Length; i++)
                 PivotPoints[i] = new CVector3(br);

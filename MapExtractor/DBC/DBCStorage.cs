@@ -16,8 +16,8 @@ namespace AlphaCoreExtractor.DBC
 {
     public static class DBCStorage
     {
-        private static readonly Dictionary<uint, AreaTable> AreaTable = new Dictionary<uint, AreaTable>();
-        private static readonly Dictionary<uint, Dictionary<uint, AreaTable>> MappedAreaTables = new Dictionary<uint, Dictionary<uint, AreaTable>>();
+        private static Dictionary<uint, AreaTable> AreaTable = new Dictionary<uint, AreaTable>();
+        private static Dictionary<uint, Dictionary<uint, AreaTable>> MappedAreaTables = new Dictionary<uint, Dictionary<uint, AreaTable>>();
         private static ConcurrentDictionary<uint, DBCMap> Maps;
 
         public static bool Initialize()

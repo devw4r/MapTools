@@ -13,10 +13,11 @@ public struct IniValue
 {
     private static bool TryParseInt(string text, out int value)
     {
+        int res;
         if (Int32.TryParse(text,
             System.Globalization.NumberStyles.Integer,
             System.Globalization.CultureInfo.InvariantCulture,
-            out int res))
+            out res))
         {
             value = res;
             return true;
@@ -27,10 +28,11 @@ public struct IniValue
 
     private static bool TryParseDouble(string text, out double value)
     {
+        double res;
         if (Double.TryParse(text,
             System.Globalization.NumberStyles.Float,
             System.Globalization.CultureInfo.InvariantCulture,
-            out double res))
+            out res))
         {
             value = res;
             return true;
@@ -43,13 +45,14 @@ public struct IniValue
 
     public IniValue(object value)
     {
-        if (value is IFormattable formattable)
+        var formattable = value as IFormattable;
+        if (formattable != null)
         {
             Value = formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
         }
         else
         {
-            Value = value?.ToString();
+            Value = value != null ? value.ToString() : null;
         }
     }
 
@@ -60,7 +63,8 @@ public struct IniValue
 
     public bool ToBool(bool valueIfInvalid = false)
     {
-        if (TryConvertBool(out bool res))
+        bool res;
+        if (TryConvertBool(out res))
         {
             return res;
         }
@@ -71,7 +75,7 @@ public struct IniValue
     {
         if (Value == null)
         {
-            result = default;
+            result = default(bool);
             return false;
         }
         var boolStr = Value.Trim().ToLowerInvariant();
@@ -85,13 +89,14 @@ public struct IniValue
             result = false;
             return true;
         }
-        result = default;
+        result = default(bool);
         return false;
     }
 
     public int ToInt(int valueIfInvalid = 0)
     {
-        if (TryConvertInt(out int res))
+        int res;
+        if (TryConvertInt(out res))
         {
             return res;
         }
@@ -102,7 +107,7 @@ public struct IniValue
     {
         if (Value == null)
         {
-            result = default;
+            result = default(int);
             return false;
         }
         if (TryParseInt(Value.Trim(), out result))
@@ -114,7 +119,8 @@ public struct IniValue
 
     public double ToDouble(double valueIfInvalid = 0)
     {
-        if (TryConvertDouble(out double res))
+        double res;
+        if (TryConvertDouble(out res))
         {
             return res;
         }
@@ -125,7 +131,7 @@ public struct IniValue
     {
         if (Value == null)
         {
-            result = default;
+            result = default(double);
             return false; ;
         }
         if (TryParseDouble(Value.Trim(), out result))
@@ -224,7 +230,7 @@ public struct IniValue
 
 public class IniFile : IEnumerable<KeyValuePair<string, IniSection>>, IDictionary<string, IniSection>
 {
-    private readonly Dictionary<string, IniSection> sections;
+    private Dictionary<string, IniSection> sections;
     public IEqualityComparer<string> StringComparer;
 
     public bool SaveEmptySections;
@@ -314,7 +320,10 @@ public class IniFile : IEnumerable<KeyValuePair<string, IniSection>>, IDictionar
                     }
                     else if (section != null && trimStart[0] != ';')
                     {
-                        if (LoadValue(line, out string key, out IniValue val))
+                        string key;
+                        IniValue val;
+
+                        if (LoadValue(line, out key, out val))
                         {
                             section[key] = val;
                         }
@@ -452,7 +461,8 @@ public class IniFile : IEnumerable<KeyValuePair<string, IniSection>>, IDictionar
     {
         get
         {
-            if (sections.TryGetValue(section, out IniSection s))
+            IniSection s;
+            if (sections.TryGetValue(section, out s))
             {
                 return s;
             }
@@ -518,7 +528,7 @@ public class IniFile : IEnumerable<KeyValuePair<string, IniSection>>, IDictionar
 
 public class IniSection : IEnumerable<KeyValuePair<string, IniValue>>, IDictionary<string, IniValue>
 {
-    private readonly Dictionary<string, IniValue> values;
+    private Dictionary<string, IniValue> values;
 
     #region Ordered
     private List<string> orderedKeys;
@@ -951,7 +961,8 @@ public class IniSection : IEnumerable<KeyValuePair<string, IniValue>>, IDictiona
     {
         get
         {
-            if (values.TryGetValue(name, out IniValue val))
+            IniValue val;
+            if (values.TryGetValue(name, out val))
             {
                 return val;
             }

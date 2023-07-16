@@ -44,7 +44,8 @@ namespace AlphaCoreExtractor.Core.WorldObject.Chunks.WMOGroups
 
             if (Positive != null)
                 Positive.GetIndices(indices);
-            Negative?.GetIndices(indices);
+            if (Negative != null)
+                Negative.GetIndices(indices);
         }
     }
 }

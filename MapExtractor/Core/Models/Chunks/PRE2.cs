@@ -17,10 +17,13 @@ namespace AlphaCoreExtractor.Core.Models.Chunks
 {
     public class PRE2 : BaseChunk, IReadOnlyCollection<ParticleEmitter2>
     {
-        readonly ParticleEmitter2[] ParticleEmitter2s;
+        ParticleEmitter2[] ParticleEmitter2s;
 
         public PRE2(BinaryReader br, uint version) : base(br)
         {
+            br.BaseStream.Position += Size;
+            return;
+
             ParticleEmitter2s = new ParticleEmitter2[br.ReadInt32()];
             for (int i = 0; i < ParticleEmitter2s.Length; i++)
                 ParticleEmitter2s[i] = new ParticleEmitter2(br);

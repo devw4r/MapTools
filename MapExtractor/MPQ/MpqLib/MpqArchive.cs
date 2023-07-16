@@ -26,13 +26,12 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-
+using AlphaCoreExtractor.Helpers;
+using AlphaCoreExtractor.Log;
 using System;
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-
-using AlphaCoreExtractor.Helpers;
+using System.IO;
 
 namespace MpqLib
 {
@@ -76,7 +75,8 @@ namespace MpqLib
 
 		public void Dispose()
 		{
-            BaseStream?.Close();
+            if (BaseStream != null)
+                BaseStream.Close();
 		}
 
 		private void Init()
@@ -137,9 +137,10 @@ namespace MpqLib
 		public MpqStream OpenFile(string filename)
 		{
             filename = Paths.Transform(filename);
-            MpqEntry entry;
+            MpqHash hash;
+			MpqEntry entry;
 
-            if (!TryGetHashEntry(filename, out MpqHash hash))
+			if (!TryGetHashEntry(filename, out hash))
 				throw new FileNotFoundException("File not found: " + filename);
 
             entry = _entries[hash.BlockIndex];
@@ -158,8 +159,10 @@ namespace MpqLib
 		public bool FileExists(string filename)
 		{
             filename = Paths.Transform(filename);
-            return TryGetHashEntry(filename, out MpqHash hash);
-        }
+            MpqHash hash;
+            
+            return TryGetHashEntry(filename, out hash);
+		}
 
         public bool AddListfileFilenames()
         {
@@ -183,7 +186,8 @@ namespace MpqLib
 
         public bool AddFilename(string filename)
         {
-            if (!TryGetHashEntry(filename, out MpqHash hash))
+            MpqHash hash;
+            if (!TryGetHashEntry(filename, out hash)) 
                 return false;
 
             _entries[hash.BlockIndex].Filename = filename;
@@ -199,7 +203,8 @@ namespace MpqLib
         {
             get 
             {
-                if (!TryGetHashEntry(filename, out MpqHash hash))
+                MpqHash hash;
+                if (!TryGetHashEntry(filename, out hash)) 
                     return null;
                 return _entries[hash.BlockIndex];
             }

@@ -14,10 +14,13 @@ namespace AlphaCoreExtractor.Core.Models.Chunks
 {
 	public class GEOA : BaseChunk, IReadOnlyCollection<GeosetAnimation>
 	{
-        readonly GeosetAnimation[] GeosetAnimations;
+		GeosetAnimation[] GeosetAnimations;
 
 		public GEOA(BinaryReader br, uint version) : base(br)
 		{
+			br.BaseStream.Position += Size;
+			return;
+
 			GeosetAnimations = new GeosetAnimation[br.ReadInt32()];
 			for (int i = 0; i < GeosetAnimations.Length; i++)
 				GeosetAnimations[i] = new GeosetAnimation(br);

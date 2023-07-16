@@ -160,7 +160,8 @@ namespace AlphaCoreExtractor.Core.Mesh
                 if (!face.IsVisible) 
                     continue;
 
-                switch (ClipFace(face, out CFace newFace))
+                CFace newFace;
+                switch (ClipFace(face, out newFace))
                 {
                     case (ClipperResponse.SomeClipped):
                         {
@@ -279,7 +280,8 @@ namespace AlphaCoreExtractor.Core.Mesh
 
                 foreach (var vertIdx in face.VertIdxs)
                 {
-                    if (!indexes.TryGetValue(vertIdx, out int newIdx))
+                    int newIdx;
+                    if (!indexes.TryGetValue(vertIdx, out newIdx))
                     {
                         newIdx = vertices.Count;
                         indexes.Add(vertIdx, newIdx);
@@ -380,7 +382,7 @@ namespace AlphaCoreExtractor.Core.Mesh
             }
         }
 
-        private readonly struct VertCoord : IEquatable<VertCoord>
+        private struct VertCoord : IEquatable<VertCoord>
         {
             public readonly int I;
             public readonly int J;
@@ -410,7 +412,7 @@ namespace AlphaCoreExtractor.Core.Mesh
 
             public override bool Equals(object obj)
             {
-                if (obj is null) return false;
+                if (ReferenceEquals(null, obj)) return false;
                 if (obj.GetType() != typeof(VertCoord)) return false;
                 return Equals((VertCoord)obj);
             }

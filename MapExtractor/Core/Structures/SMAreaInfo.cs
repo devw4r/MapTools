@@ -39,7 +39,7 @@ namespace AlphaCoreExtractor.Core.Structures
             sb.AppendLine("SMAreaInfo");
             sb.AppendLine($"Offset: {offset}");
             sb.AppendLine($"flags: {offset}");
-            sb.AppendLine($"pad: {pad}");
+            sb.AppendLine($"pad: {pad.ToString()}");
             return sb.ToString();
         }
     }

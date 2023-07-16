@@ -380,8 +380,11 @@ namespace AlphaCoreExtractor.Core.Structures
                 var time0 = (X - ray.Position.X) * invDenom;
                 var time1 = (Right - ray.Position.X) * invDenom;
                 if (time0 > time1)
-                    (time1, time0) = (time0, time1);
-
+                {
+                    var temp = time0;
+                    time0 = time1;
+                    time1 = temp;
+                }
                 time = MathHelper.Max(time0, time);
                 maxValue = MathHelper.Min(time1, maxValue);
                 if (time > maxValue)
@@ -403,8 +406,11 @@ namespace AlphaCoreExtractor.Core.Structures
                 var time0 = (Y - ray.Position.Y) * invDenom;
                 var time1 = (Bottom - ray.Position.Y) * invDenom;
                 if (time0 > time1)
-                    (time1, time0) = (time0, time1);
-
+                {
+                    var temp = time0;
+                    time0 = time1;
+                    time1 = temp;
+                }
                 time = MathHelper.Max(time0, time);
                 maxValue = MathHelper.Min(time1, maxValue);
                 if (time > maxValue)
@@ -454,7 +460,11 @@ namespace AlphaCoreExtractor.Core.Structures
             }
 
             if (minY > maxY)
-                (minY, maxY) = (maxY, minY);
+            {
+                var tmp = maxY;
+                maxY = minY;
+                minY = tmp;
+            }
 
             // Find the intersection of the segment's and rectangle's y-projections
 
@@ -527,25 +537,25 @@ namespace AlphaCoreExtractor.Core.Structures
                     if ((p1Flags & OutFlags.Left) == OutFlags.Left
                         && dx != 0.0)
                     {
-                        y1 += (minX - x1) * dy / dx;
+                        y1 = y1 + (minX - x1) * dy / dx;
                         x1 = minX;
                     }
                     else if ((p1Flags & OutFlags.Right) == OutFlags.Right
                              && dx != 0.0)
                     {
-                        y1 += (maxX - x1) * dy / dx;
+                        y1 = y1 + (maxX - x1) * dy / dx;
                         x1 = maxX;
                     }
                     else if ((p1Flags & OutFlags.Bottom) == OutFlags.Bottom
                              && dy != 0.0)
                     {
-                        x1 += (maxY - y1) * dx / dy;
+                        x1 = x1 + (maxY - y1) * dx / dy;
                         y1 = maxY;
                     }
                     else if ((p1Flags & OutFlags.Top) == OutFlags.Top
                              && dy != 0.0)
                     {
-                        x1 += (minY - y1) * dx / dy;
+                        x1 = x1 + (minY - y1) * dx / dy;
                         y1 = minY;
                     }
                     p1Flags = CalcOutFlags(x1, y1);
@@ -557,25 +567,25 @@ namespace AlphaCoreExtractor.Core.Structures
                     if ((p2Flags & OutFlags.Left) == OutFlags.Left
                         && dx != 0.0)
                     {
-                        y2 += (minX - x2) * dy / dx;
+                        y2 = y2 + (minX - x2) * dy / dx;
                         x2 = minX;
                     }
                     else if ((p2Flags & OutFlags.Right) == OutFlags.Right
                              && dx != 0.0)
                     {
-                        y2 += (maxX - x2) * dy / dx;
+                        y2 = y2 + (maxX - x2) * dy / dx;
                         x2 = maxX;
                     }
                     else if ((p2Flags & OutFlags.Bottom) == OutFlags.Bottom
                              && dy != 0.0)
                     {
-                        x2 += (maxY - y2) * dx / dy;
+                        x2 = x2 + (maxY - y2) * dx / dy;
                         y2 = maxY;
                     }
                     else if ((p2Flags & OutFlags.Top) == OutFlags.Top
                              && dy != 0.0)
                     {
-                        x2 += (minY - y2) * dx / dy;
+                        x2 = x2 + (minY - y2) * dx / dy;
                         y2 = minY;
                     }
                     p2Flags = CalcOutFlags(x2, y2);

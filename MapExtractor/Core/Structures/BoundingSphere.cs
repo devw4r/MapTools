@@ -67,8 +67,10 @@ namespace AlphaCoreExtractor.Core.Structures
 
         public bool Intersects(BoundingBox box)
         {
-            Vector3.Clamp(ref this.Center, ref box.Min, ref box.Max, out Vector3 vector);
-            Vector3.DistanceSquared(ref this.Center, ref vector, out float num);
+            float num;
+            Vector3 vector;
+            Vector3.Clamp(ref this.Center, ref box.Min, ref box.Max, out vector);
+            Vector3.DistanceSquared(ref this.Center, ref vector, out num);
             return (num <= (this.Radius * this.Radius));
         }
 
@@ -89,7 +91,7 @@ namespace AlphaCoreExtractor.Core.Structures
         /// <returns>true if the object is <see cref="BoundingSphere" /> and is equal; false otherwise</returns>
         public override bool Equals(object obj)
         {
-            return obj is BoundingSphere sphere && Equals(sphere);
+            return obj is BoundingSphere && Equals((BoundingSphere)obj);
         }
 
         public override int GetHashCode()

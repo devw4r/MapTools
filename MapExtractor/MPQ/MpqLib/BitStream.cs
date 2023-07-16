@@ -36,7 +36,7 @@ namespace MpqLib
 	/// </summary>
 	internal class BitStream
 	{
-        private readonly Stream _baseStream;
+        private Stream _baseStream;
         private int _current;
 		private int _bitCount;
 

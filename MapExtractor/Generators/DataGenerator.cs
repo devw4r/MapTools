@@ -19,8 +19,6 @@ using AlphaCoreExtractor.Core.Terrain;
 using AlphaCoreExtractor.Helpers.Enums;
 using AlphaCoreExtractor.DBC.Structures;
 using AlphaCoreExtractor.Core.Structures;
-using System.Text;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace AlphaCoreExtractor.Generators
 {
@@ -29,38 +27,92 @@ namespace AlphaCoreExtractor.Generators
         [DllImport("/recast/AlphaCoreRecast.dll", EntryPoint = "ExtractNav", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern bool ExtractNav(string filePath, string outputNav);
 
-        public static uint GeneratedMaps = 0;
-        public static uint GeneratedObjs = 0;
-        public static uint GeneratedNavs = 0;
+        private static readonly bool[,] EmptyHolesArray = new bool[4, 4];
 
-        public static void ResetCount()
+        public static void GenerateData(WDT wdt, out int generatedMaps, out int generatedNavs, out int generatedObjs)
         {
-            GeneratedMaps = 0;
-            GeneratedObjs = 0;
-            GeneratedNavs = 0;
+            generatedMaps = 0;
+            generatedNavs = 0;
+            generatedObjs = 0;
+            var mapID = wdt.MapID.ToString("000");
+
+            // TODO
+            if (wdt.IsWMOBased)
+            {
+                Logger.Info($"Skipping nav generation for Map {wdt.Name}...");
+                return;
+            }
+           
+            try
+            {
+                uint total_tiles = Convert.ToUInt32(Constants.TileBlockSize * Constants.TileBlockSize);
+                int processed_tiles = 0;
+                Logger.Notice($"Generating files for Map {wdt.DBCMap.MapName_enUS}");
+
+                for (int tileBlockX = 0; tileBlockX < Constants.TileBlockSize; tileBlockX++)
+                {
+                    for (int tileBlockY = 0; tileBlockY < Constants.TileBlockSize; tileBlockY++)
+                    {
+                        if (wdt.TileBlocks[tileBlockX, tileBlockY] is ADT adt)
+                        {
+                            using (adt)
+                            {
+                                var blockX = tileBlockX.ToString("00");
+                                var blockY = tileBlockY.ToString("00");
+                                var outputMapFileName = $@"{Paths.OutputMapsPath}{mapID}{blockX}{blockY}.map";
+                                var outputObjFileName = $@"{Paths.OutputGeomPath}{mapID}{blockX}{blockY}.obj";
+
+                                if (Configuration.GenerateMaps == GenerateMaps.Enabled)
+                                {
+                                    GenerateMapFiles(wdt, adt, outputMapFileName);
+                                    generatedMaps++;
+                                }
+
+                                if(Configuration.GenerateObjs == GenerateObjs.Enabled || Configuration.GenerateNavs == GenerateNavs.Enabled)
+                                {
+                                    GenerateMeshFiles(wdt, adt, outputObjFileName);
+                                    if(Configuration.GenerateNavs == GenerateNavs.Enabled)
+                                        generatedNavs++;
+                                    if (Configuration.GenerateObjs == GenerateObjs.Enabled)
+                                        generatedObjs++;
+                                }
+                            }
+                            GC.Collect();
+                        }
+
+                        Logger.Progress("Generating files", ++processed_tiles, total_tiles, 200);
+                    }
+                }
+
+                if (generatedMaps == 0)
+                    Logger.Warning($"No tile data for Map {wdt.DBCMap.MapName_enUS}");
+                else
+                    Logger.Success($"Generated {generatedMaps} .map files for Map {wdt.DBCMap.MapName_enUS}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.Message);
+            }
         }
 
         #region NavFiles
-        private static readonly int HeightsPerTileSide = Constants.CellSize * Constants.TileSize;
-        private static void GenerateMeshFiles(WDT wdt, ADT adt)
+        private static int HeightsPerTileSide = Constants.CellSize * Constants.TileSize;
+        private static int[,] TileVertLocations = new int[HeightsPerTileSide + 1, HeightsPerTileSide + 1];
+        private static bool[,] TileHolesMap = new bool[HeightsPerTileSide + 1, HeightsPerTileSide + 1];
+        private static List<Vector3> TileVerts = new List<Vector3>();
+        private static void GenerateMeshFiles(WDT wdt, ADT adt, string outputObjFileName)
         {
-            int[,] tileVertLocations = new int[HeightsPerTileSide + 1, HeightsPerTileSide + 1];
-            bool[,] tileHolesMap = new bool[HeightsPerTileSide + 1, HeightsPerTileSide + 1];
-            List<Vector3> tileVerts = new List<Vector3>();
-
             try
             {
-                var outFileName = $@"{Paths.OutputGeomPath}{wdt.MapID:000}{adt.TileX:00}{adt.TileY:00}.obj";
-
-                if (File.Exists(outFileName))
+                if (File.Exists(outputObjFileName))
                 {
-                    try { File.Delete(outFileName); }
+                    try { File.Delete(outputObjFileName); }
                     catch (Exception ex) { Logger.Error(ex.Message); return; }
                 }
 
                 for (var i = 0; i < (HeightsPerTileSide + 1); i++)
                     for (var j = 0; j < (HeightsPerTileSide + 1); j++)
-                        tileVertLocations[i, j] = -1;
+                        TileVertLocations[i, j] = -1;
 
                 for (var x = 0; x < Constants.TileSize; x++)
                 {
@@ -68,7 +120,7 @@ namespace AlphaCoreExtractor.Generators
                     {
                         var tileChunk = adt.Tiles[x, y];
                         var heights = tileChunk.MCVTSubChunk.GetLowResMapMatrix();
-                        var holes = (tileChunk.holes_low_mask > 0) ? tileChunk.HolesMap : emptyHolesArray;
+                        var holes = (tileChunk.holes_low_mask > 0) ? tileChunk.HolesMap : EmptyHolesArray;
 
                         // Add the height map values, inserting them into their correct positions.
                         for (var unitX = 0; unitX <= Constants.CellSize; unitX++)
@@ -78,7 +130,7 @@ namespace AlphaCoreExtractor.Generators
                                 var tileX = (x * Constants.CellSize) + unitX;
                                 var tileY = (y * Constants.CellSize) + unitY;
 
-                                var vertIndex = tileVertLocations[tileX, tileY];
+                                var vertIndex = TileVertLocations[tileX, tileY];
                                 if (vertIndex == -1)
                                 {
                                     var xPos = Constants.CenterPoint
@@ -89,14 +141,14 @@ namespace AlphaCoreExtractor.Generators
                                                - (tileY * Constants.UnitSize);
                                     var zPos = heights[unitX, unitY]; // Absolute height in Alpha.
 
-                                    tileVertLocations[tileX, tileY] = tileVerts.Count;
-                                    tileVerts.Add(StorageRoom.PopVector3(xPos, yPos, zPos));
+                                    TileVertLocations[tileX, tileY] = TileVerts.Count;
+                                    TileVerts.Add(StorageRoom.PopVector3(xPos, yPos, zPos));
                                 }
 
                                 if (unitY == Constants.CellSize || unitX == Constants.CellSize)
                                     continue;
 
-                                tileHolesMap[tileX, tileY] = holes[unitX / 2, unitY / 2];
+                                TileHolesMap[tileX, tileY] = holes[unitX / 2, unitY / 2];
                             }
                         }
                     }
@@ -107,19 +159,19 @@ namespace AlphaCoreExtractor.Generators
                 {
                     for (var tileY = 0; tileY < HeightsPerTileSide; tileY++)
                     {
-                        if (tileHolesMap[tileX, tileY])
+                        if (TileHolesMap[tileX, tileY])
                             continue;
 
                         // Top triangle.
-                        var vertId0 = tileVertLocations[tileX, tileY];
-                        var vertId1 = tileVertLocations[tileX, tileY + 1];
-                        var vertId9 = tileVertLocations[tileX + 1, tileY];
+                        var vertId0 = TileVertLocations[tileX, tileY];
+                        var vertId1 = TileVertLocations[tileX, tileY + 1];
+                        var vertId9 = TileVertLocations[tileX + 1, tileY];
                         tileIndices.Add(vertId0);
                         tileIndices.Add(vertId1);
                         tileIndices.Add(vertId9);
 
                         // Bottom triangle.
-                        var vertId10 = tileVertLocations[tileX + 1, tileY + 1];
+                        var vertId10 = TileVertLocations[tileX + 1, tileY + 1];
                         tileIndices.Add(vertId1);
                         tileIndices.Add(vertId10);
                         tileIndices.Add(vertId9);
@@ -127,9 +179,9 @@ namespace AlphaCoreExtractor.Generators
                 }
 
                 if (adt.WMOs.Count > 0 || adt.MDXs.Count > 0)
-                    AppendWMOsAndMDX(ref tileVerts, ref tileIndices, adt);
-                if (tileVerts.Count > 0)
-                    ExportMesh(outFileName, tileVerts, tileIndices);
+                    AppendWMOsAndMDX(ref TileVerts, ref tileIndices, adt);
+                if (TileVerts.Count > 0)
+                    ExportMesh(outputObjFileName, TileVerts, tileIndices);
             }
             catch (Exception ex)
             {
@@ -137,11 +189,11 @@ namespace AlphaCoreExtractor.Generators
             }
             finally
             {
-                Array.Clear(tileVertLocations, 0, tileVertLocations.Length);
-                Array.Clear(tileHolesMap, 0, tileHolesMap.Length);
-                foreach (Vector3 vector in tileVerts)
+                Array.Clear(TileVertLocations, 0, TileVertLocations.Length);
+                Array.Clear(TileHolesMap, 0, TileHolesMap.Length);
+                foreach (Vector3 vector in TileVerts)
                     StorageRoom.PushVector3(vector);
-                tileVerts.Clear();
+                TileVerts.Clear();
             }
         }
 
@@ -187,16 +239,6 @@ namespace AlphaCoreExtractor.Generators
                                     indices.Add(offset + index);
                             }
                         }
-
-                        // Liquids.
-                        //clipper.ClipMesh(wmo.WmoLiquidVertices, wmo.WmoLiquidIndices, out newVertices, out newIndices);
-                        //offset = verts.Count;
-                        //if (newVertices.Count > 0 && newIndices.Count > 0)
-                        //{
-                        //    verts.AddRange(newVertices);
-                        //    foreach (var index in newIndices)
-                        //        indices.Add(offset + index);
-                        //}
                     }
                     GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
                 }
@@ -224,21 +266,19 @@ namespace AlphaCoreExtractor.Generators
 
         private static void ExportMesh(string fileName, List<Vector3> vertices, List<int> indices)
         {
-            StringBuilder data = new StringBuilder();
-
-            // Verts.
-            foreach (var vertex in vertices)
-            {
-                vertex.ToRecast();
-                data.AppendLine($"v {vertex.X} {vertex.Y} {vertex.Z}");
-            }
-
-            // Faces.
-            for (var i = 0; i < indices.Count; i += 3)
-                data.AppendLine($"f {indices[i + 2] + 1} {indices[i + 1] + 1} {indices[i] + 1}");
-
             using (var file = new StreamWriter(fileName))
-                file.Write(data);
+            {
+                // Write verts.
+                foreach (var vertex in vertices)
+                {
+                    vertex.ToRecast();
+                    file.WriteLine("v {0} {1} {2}", vertex.X, vertex.Y, vertex.Z);
+                }
+
+                // Write faces.
+                for (var i = 0; i < indices.Count; i += 3)
+                    file.WriteLine("f {0} {1} {2}", indices[i + 2] + 1, indices[i + 1] + 1, indices[i] + 1);
+            }
 
             // Create .nav files if requested.
             if (Configuration.GenerateNavs == GenerateNavs.Enabled)
@@ -309,36 +349,16 @@ namespace AlphaCoreExtractor.Generators
         }
         #endregion
 
-        public static void WriteADTFiles(WDT wdt, ADT adt)
-        {
-            if (Configuration.GenerateMaps == GenerateMaps.Enabled)
-            {
-                GenerateMapFiles(wdt, adt);
-                GeneratedMaps++;
-            }
-
-            if (Configuration.GenerateObjs == GenerateObjs.Enabled || Configuration.GenerateNavs == GenerateNavs.Enabled)
-            {
-                GenerateMeshFiles(wdt, adt);
-                if (Configuration.GenerateNavs == GenerateNavs.Enabled)
-                    GeneratedNavs++;
-                if (Configuration.GenerateObjs == GenerateObjs.Enabled)
-                    GeneratedObjs++;
-            }
-        }
-
         #region MapFiles
-        private static void GenerateMapFiles(WDT wdt, ADT adt)
+        private static void GenerateMapFiles(WDT wdt, ADT adt, string outputMapFileName)
         {
-            var outFileName = $@"{Paths.OutputMapsPath}{wdt.MapID:000}{adt.TileX:00}{adt.TileY:00}.map";
-
-            if (File.Exists(outFileName))
+            if (File.Exists(outputMapFileName))
             {
-                try { File.Delete(outFileName); }
+                try { File.Delete(outputMapFileName); }
                 catch (Exception ex) { Logger.Error(ex.Message); return; }
             }
 
-            using (FileStream fileStream = new FileStream(outFileName, FileMode.Create))
+            using (FileStream fileStream = new FileStream(outputMapFileName, FileMode.Create))
             {
                 //Map version.
                 fileStream.WriteMapVersion();
@@ -351,15 +371,14 @@ namespace AlphaCoreExtractor.Generators
             }
         }
 
-        private static readonly bool[,] LiquidShow = new bool[(int)Constants.GridSize, (int)Constants.GridSize];
-        private static readonly float[,] LiquidHeight = new float[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
-        private static readonly sbyte[,] LiquidFlag = new sbyte[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
-        private static readonly bool[,] emptyHolesArray = new bool[4, 4];
+        private static bool[,] liquid_show = new bool[(int)Constants.GridSize, (int)Constants.GridSize];
+        private static float[,] liquid_height = new float[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
+        private static sbyte[,] liquid_flag = new sbyte[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
         private static void WriteLiquids(BinaryWriter binaryWriter, ADT adt)
         {
-            Array.Clear(LiquidShow, 0, LiquidShow.Length);
-            Array.Clear(LiquidHeight, 0, LiquidHeight.Length);
-            Array.Clear(LiquidFlag, 0, LiquidFlag.Length);
+            Array.Clear(liquid_show, 0, liquid_show.Length);
+            Array.Clear(liquid_height, 0, liquid_height.Length);
+            Array.Clear(liquid_flag, 0, liquid_flag.Length);
 
             for (int i = 0; i < Constants.TileSize; i++)
             {
@@ -388,18 +407,18 @@ namespace AlphaCoreExtractor.Generators
                             // Check if this liquid is rendered by the client.
                             if (liquid.Flags[y, x] != 0x0F)
                             {
-                                LiquidShow[cy, cx] = true;
+                                liquid_show[cy, cx] = true;
 
                                 // Overwrite DEEP water flag.
                                 if ((liquid.Flags[y, x] & (1 << 7)) != 0)
                                     liquid.Flag = SMChunkFlags.FLAG_LQ_DEEP;
 
-                                LiquidHeight[cy, cx] = liquid.GetHeight(y, x);
-                                LiquidFlag[cy, cx] = (sbyte)liquid.Flag;
+                                liquid_height[cy, cx] = liquid.GetHeight(y, x);
+                                liquid_flag[cy, cx] = (sbyte)liquid.Flag;
                             }
                             else
                             {
-                                LiquidShow[cy, cx] = false;
+                                liquid_show[cy, cx] = false;
                             }
                         }
                     }
@@ -410,10 +429,10 @@ namespace AlphaCoreExtractor.Generators
             {
                 for (int x = 0; x < Constants.GridSize; x++)
                 {
-                    if (LiquidShow[y, x])
+                    if (liquid_show[y, x])
                     {
-                        binaryWriter.Write(LiquidFlag[y, x]);
-                        binaryWriter.Write(LiquidHeight[y, x]);
+                        binaryWriter.Write(liquid_flag[y, x]);
+                        binaryWriter.Write(liquid_height[y, x]);
                     }
                     else
                         binaryWriter.Write((sbyte)-1);

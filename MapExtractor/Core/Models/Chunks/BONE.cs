@@ -14,7 +14,7 @@ namespace AlphaCoreExtractor.Core.Models.Chunks
 {
     public class BONE : BaseChunk, IReadOnlyCollection<Bone>
     {
-        private readonly Bone[] Bones;
+        private Bone[] Bones;
 
         public BONE(BinaryReader br, uint version) : base(br)
 		{

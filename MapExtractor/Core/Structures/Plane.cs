@@ -53,9 +53,10 @@ namespace AlphaCoreExtractor.Core.Structures
         public override bool Equals(object obj)
         {
             bool flag = false;
-            if (obj is Plane plane)
-                flag = this.Equals(plane);
-
+            if (obj is Plane)
+            {
+                flag = this.Equals((Plane)obj);
+            }
             return flag;
         }
 
@@ -122,7 +123,8 @@ namespace AlphaCoreExtractor.Core.Structures
         public static Plane Transform(Plane plane, Matrix matrix)
         {
             Plane plane2;
-            Matrix.Invert(ref matrix, out Matrix matrix2);
+            Matrix matrix2;
+            Matrix.Invert(ref matrix, out matrix2);
             float x = plane.Normal.X;
             float y = plane.Normal.Y;
             float z = plane.Normal.Z;
@@ -136,7 +138,8 @@ namespace AlphaCoreExtractor.Core.Structures
 
         public static void Transform(ref Plane plane, ref Matrix matrix, out Plane result)
         {
-            Matrix.Invert(ref matrix, out Matrix matrix2);
+            Matrix matrix2;
+            Matrix.Invert(ref matrix, out matrix2);
             float x = plane.Normal.X;
             float y = plane.Normal.Y;
             float z = plane.Normal.Z;

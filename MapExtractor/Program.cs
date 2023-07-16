@@ -116,19 +116,28 @@ namespace AlphaCoreExtractor
                 // Flush .map files output dir.
                 Directory.Delete(Paths.OutputMapsPath, true);
 
+                int GeneratedMapFiles = 0;
+                int GeneratedMeshesh = 0;
+                int GeneratedObjFiles = 0;
                 //Begin parsing adt files and generate .map files.
                 foreach (var entry in WDTFiles)
+                {
                     using (WDT map = new WDT(entry.Key, entry.Value)) // Key:DbcMap Value:FilePath
-                        Logger.Success($"Finished processing {map.Name}.");
+                    {
+                        DataGenerator.GenerateData(map, out int generatedMaps, out int generatedMeshes, out int generatedObjFiles);
+                        GeneratedMapFiles += generatedMaps;
+                        GeneratedMeshesh += generatedMeshes;
+                        GeneratedObjFiles += generatedObjFiles;
+                    }
+                    GC.Collect();
+                }
 
                 WDTFiles?.Clear();
                 Console.WriteLine();
-                if (Configuration.GenerateMaps == GenerateMaps.Enabled)
-                    Logger.Success($"Generated a total of {DataGenerator.GeneratedMaps} .map files.");
-                if (Configuration.GenerateObjs == GenerateObjs.Enabled)
-                    Logger.Success($"Generated a total of {DataGenerator.GeneratedObjs} .obj files.");
-                if (Configuration.GenerateNavs == GenerateNavs.Enabled)
-                    Logger.Success($"Generated a total of {DataGenerator.GeneratedNavs} .nav files.");
+                if(Configuration.GenerateMaps == GenerateMaps.Enabled)
+                    Logger.Success($"Generated a total of {GeneratedMapFiles} .map files.");
+                if(Configuration.GenerateNavs == GenerateNavs.Enabled)
+                    Logger.Success($"Generated a total of {GeneratedMeshesh} .nav files.");
                 Logger.Success("Process Complete, press any key to exit...");
             }
             catch (Exception ex)
@@ -164,7 +173,7 @@ namespace AlphaCoreExtractor
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Configuration");
             Console.WriteLine($"Heightmap Z Resolution: {Configuration.ZResolution}");
-            Console.WriteLine($"WoW Path: {Configuration.WoWPath}");
+            Console.WriteLine($"WoW Path: {Configuration.WoWPath}");         
             Console.WriteLine($"GenerateMaps: {Configuration.GenerateMaps}");
             Console.WriteLine($"GenerateNavs: {Configuration.GenerateNavs}");
             Console.WriteLine($"GenerateObjs: {Configuration.GenerateObjs}");

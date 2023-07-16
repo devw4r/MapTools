@@ -289,7 +289,7 @@ namespace AlphaCoreExtractor.Core.Structures
         /// <returns>true if the object is <see cref="BoundingBox" /> and is equal; false otherwise</returns>
         public override bool Equals(object obj)
         {
-            return obj is BoundingBox box && Equals(box);
+            return obj is BoundingBox && Equals((BoundingBox)obj);
         }
 
         public override int GetHashCode()
@@ -335,7 +335,9 @@ namespace AlphaCoreExtractor.Core.Structures
                 float num7 = (this.Max.X - ray.Position.X) * num11;
                 if (num8 > num7)
                 {
-                    (num7, num8) = (num8, num7);
+                    float num14 = num8;
+                    num8 = num7;
+                    num7 = num14;
                 }
                 num = Math.Max(num8, num);
                 maxValue = Math.Min(num7, maxValue);
@@ -357,8 +359,11 @@ namespace AlphaCoreExtractor.Core.Structures
                 float num6 = (this.Min.Y - ray.Position.Y) * num10;
                 float num5 = (this.Max.Y - ray.Position.Y) * num10;
                 if (num6 > num5)
-                    (num5, num6) = (num6, num5);
-
+                {
+                    float num13 = num6;
+                    num6 = num5;
+                    num5 = num13;
+                }
                 num = Math.Max(num6, num);
                 maxValue = Math.Min(num5, maxValue);
                 if (num > maxValue)
@@ -379,8 +384,11 @@ namespace AlphaCoreExtractor.Core.Structures
                 float num4 = (this.Min.Z - ray.Position.Z) * num9;
                 float num3 = (this.Max.Z - ray.Position.Z) * num9;
                 if (num4 > num3)
-                    (num3, num4) = (num4, num3);
-
+                {
+                    float num12 = num4;
+                    num4 = num3;
+                    num3 = num12;
+                }
                 num = Math.Max(num4, num);
                 maxValue = Math.Min(num3, maxValue);
                 if (num > maxValue)
@@ -409,7 +417,11 @@ namespace AlphaCoreExtractor.Core.Structures
                 float num8 = (this.Min.X - ray.Position.X) * num11;
                 float num7 = (this.Max.X - ray.Position.X) * num11;
                 if (num8 > num7)
-                    (num7, num8) = (num8, num7);
+                {
+                    float num14 = num8;
+                    num8 = num7;
+                    num7 = num14;
+                }
                 num = Math.Max(num8, num);
                 maxValue = Math.Min(num7, maxValue);
                 if (num > maxValue)
@@ -430,8 +442,11 @@ namespace AlphaCoreExtractor.Core.Structures
                 float num6 = (this.Min.Y - ray.Position.Y) * num10;
                 float num5 = (this.Max.Y - ray.Position.Y) * num10;
                 if (num6 > num5)
-                    (num5, num6) = (num6, num5);
-
+                {
+                    float num13 = num6;
+                    num6 = num5;
+                    num5 = num13;
+                }
                 num = Math.Max(num6, num);
                 maxValue = Math.Min(num5, maxValue);
                 if (num > maxValue)
@@ -452,8 +467,11 @@ namespace AlphaCoreExtractor.Core.Structures
                 float num4 = (this.Min.Z - ray.Position.Z) * num9;
                 float num3 = (this.Max.Z - ray.Position.Z) * num9;
                 if (num4 > num3)
-                    (num3, num4) = (num4, num3);
-
+                {
+                    float num12 = num4;
+                    num4 = num3;
+                    num3 = num12;
+                }
                 num = Math.Max(num4, num);
                 maxValue = Math.Min(num3, maxValue);
                 if (num > maxValue)

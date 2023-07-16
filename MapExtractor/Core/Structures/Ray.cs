@@ -29,9 +29,9 @@ namespace AlphaCoreExtractor.Core.Structures
         public override bool Equals(object obj)
         {
             bool flag = false;
-            if ((obj != null) && (obj is Ray ray))
+            if ((obj != null) && (obj is Ray))
             {
-                flag = this.Equals(ray);
+                flag = this.Equals((Ray)obj);
             }
             return flag;
         }
@@ -107,6 +107,7 @@ namespace AlphaCoreExtractor.Core.Structures
                         result = 0;
                         return;
                     }
+                    result = 0f;
                 }
                 result = new float?(num);
             }

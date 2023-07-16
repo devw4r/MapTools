@@ -14,7 +14,7 @@ namespace AlphaCoreExtractor.Core.Models.Chunks
 {
     public class HELP : BaseChunk, IReadOnlyCollection<Helper>
     {
-        readonly Helper[] Helpers;
+        Helper[] Helpers;
 
         public HELP(BinaryReader br, uint version) : base(br)
 		{

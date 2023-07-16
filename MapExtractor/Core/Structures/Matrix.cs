@@ -828,14 +828,17 @@ namespace AlphaCoreExtractor.Core.Structures
 
         public static Matrix CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
-            Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll, out Quaternion quaternion);
-            CreateFromQuaternion(ref quaternion, out Matrix matrix);
+            Matrix matrix;
+            Quaternion quaternion;
+            Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll, out quaternion);
+            CreateFromQuaternion(ref quaternion, out matrix);
             return matrix;
         }
 
         public static void CreateFromYawPitchRoll(float yaw, float pitch, float roll, out Matrix result)
         {
-            Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll, out Quaternion quaternion);
+            Quaternion quaternion;
+            Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll, out quaternion);
             CreateFromQuaternion(ref quaternion, out result);
         }
 
@@ -953,9 +956,10 @@ namespace AlphaCoreExtractor.Core.Structures
         public override bool Equals(object obj)
         {
             bool flag = false;
-            if (obj is Matrix matrix)
-                flag = this.Equals(matrix);
-
+            if (obj is Matrix)
+            {
+                flag = this.Equals((Matrix)obj);
+            }
             return flag;
         }
 

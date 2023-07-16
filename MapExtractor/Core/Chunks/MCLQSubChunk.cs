@@ -13,10 +13,12 @@ namespace AlphaCoreExtractor.Core.Chunks
     public class MCLQSubChunk
     {
         public CRange Range;
+        //public object[,] Verts = new object[9, 9];
         public Dictionary<int, Dictionary<int, float>> Heights = new Dictionary<int, Dictionary<int, float>>();
         
         public byte[,] Flags = new byte[8, 8];
         public uint NFlowVS;
+        List<SWFlowv> Flowvs = new List<SWFlowv>(); // 2
         public SMChunkFlags Flag = SMChunkFlags.NONE;
 
         public float GetHeight(int y, int x)
@@ -63,7 +65,8 @@ namespace AlphaCoreExtractor.Core.Chunks
                         {
                             //Verts[i, j] = new SWVert(reader); // Water Vert
                             reader.BaseStream.Position += 4;
-                            AddHeight(i, j, reader.ReadSingle());                          
+                            AddHeight(i, j, reader.ReadSingle());
+                            
                         }
                     }
                     break;

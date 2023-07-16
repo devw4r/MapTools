@@ -16,12 +16,10 @@ namespace AlphaCoreExtractor.Core.Structures
 
         public static Vector<T> Build(T x, T y, T z)
         {
-            var vector = new Vector<T>
-            {
-                X = x,
-                Y = y,
-                Z = z
-            };
+            var vector = new Vector<T>();
+            vector.X = x;
+            vector.Y = y;
+            vector.Z = z;
             return vector;
         }
     }

@@ -16,10 +16,13 @@ namespace AlphaCoreExtractor.Core.Models.Chunks
 {
     public class RIBB : BaseChunk, IReadOnlyCollection<RibbonEmitter>
     {
-        readonly RibbonEmitter[] RibbonEmitters;
+        RibbonEmitter[] RibbonEmitters;
 
         public RIBB(BinaryReader br, uint version) : base(br)
 		{
+            br.BaseStream.Position += Size;
+            return;
+
             RibbonEmitters = new RibbonEmitter[br.ReadInt32()];
             for (int i = 0; i < RibbonEmitters.Length; i++)
                 RibbonEmitters[i] = new RibbonEmitter(br);

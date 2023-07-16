@@ -42,7 +42,7 @@ namespace MpqLib
 	public class PKLibDecompress
 	{
 		private BitStream _bitstream;
-		private readonly CompressionType _compressionType;
+		private CompressionType _compressionType;
 		private int _dictSizeBits;	// Dictionary size in bits
 		
 		private static byte[] sPosition1;

@@ -55,9 +55,10 @@ namespace AlphaCoreExtractor.Core.Structures
         public override bool Equals(object obj)
         {
             bool flag = false;
-            if (obj is Quaternion quaternion)
-                flag = this.Equals(quaternion);
-
+            if (obj is Quaternion)
+            {
+                flag = this.Equals((Quaternion)obj);
+            }
             return flag;
         }
 
