@@ -362,24 +362,26 @@ namespace AlphaCoreExtractor.Core.WorldObject
                         {
                             var tileSize = Constants.UnitSize;
                             var liquidChunk = wmoGroup.LiquidInformation[0];
-                            rotateZ = Matrix.CreateRotationZ((objectDefinition.OrientationB + 180) * MathUtil.RadiansPerDegree);
                             var baseVector = Vector3.Transform(liquidChunk.BaseCoordinates, rotateZ) + originVec;
-                            var corner_x = baseVector.X;                        
+
                             for (var y = 0; y < liquidChunk.YTileCount; y++) // Height
                             {
-                                var corner_y = baseVector.Y;
                                 for (var x = 0; x < liquidChunk.XTileCount; x++) // Width
                                 {
                                     var flag = liquidChunk.LiquidTileFlags[y, x];
                                     if (flag == 15) // Do not render.
                                         continue;
 
-                                    var v1 = StorageRoom.PopVector3(corner_x, corner_y, baseVector.Z);
-                                    //var v2 = StorageRoom.PopVector3(corner_x + (tileSize * (x + 1)), baseVector.Y + (-1 * tileSize * (y + 0)), baseVector.Z);
-                                    //var v3 = StorageRoom.PopVector3(corner_x + (tileSize * (x + 0)), baseVector.Y + (-1 * tileSize * (y + 1)), baseVector.Z);
-                                    //var v4 = StorageRoom.PopVector3(corner_x + (tileSize * (x + 1)), baseVector.Y + (-1 * tileSize * (y + 1)), baseVector.Z);
-                                    
-                                    corner_y += tileSize;
+                                    var v1 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 0)), baseVector.Y + (-1 * tileSize * (y + 0)), baseVector.Z);
+                                    var v2 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 1)), baseVector.Y + (-1 * tileSize * (y + 0)), baseVector.Z);
+                                    var v3 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 0)), baseVector.Y + (-1 * tileSize * (y + 1)), baseVector.Z);
+                                    var v4 = StorageRoom.PopVector3(baseVector.X + (tileSize * (x + 1)), baseVector.Y + (-1 * tileSize * (y + 1)), baseVector.Z);
+
+                                    //v1 = Vector3.Transform(v1, rotateZ) + originVec;
+                                    //v2 = Vector3.Transform(v2, rotateZ) + originVec;
+                                    //v3 = Vector3.Transform(v3, rotateZ) + originVec;
+                                    //v4 = Vector3.Transform(v4, rotateZ) + originVec;
+
                                     var port = $".port {v1.X} {v1.Y} {v1.Z} 0";
                                     if (!DataGenerator.Ports.Contains(port))
                                         DataGenerator.Ports.Add(port);
@@ -387,9 +389,9 @@ namespace AlphaCoreExtractor.Core.WorldObject
                                         continue;
                                 
                                     WmoLiquidVertices.Add(v1);
-                                    //WmoLiquidVertices.Add(v2);
-                                    //WmoLiquidVertices.Add(v3);
-                                    //WmoLiquidVertices.Add(v4);
+                                    WmoLiquidVertices.Add(v2);
+                                    WmoLiquidVertices.Add(v3);
+                                    WmoLiquidVertices.Add(v4);
 
                                     //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 4);
                                     //WmoLiquidIndices.Add(WmoLiquidVertices.Count - 3);
@@ -406,22 +408,20 @@ namespace AlphaCoreExtractor.Core.WorldObject
                                         var tile_x = (int)(127 * (32.0 - (v.X / Constants.TileSizeYrds) - (adt_x)));
                                         var tile_y = (int)(127 * (32.0 - (v.Y / Constants.TileSizeYrds) - (adt_y)));
 
-                                        if (tile_x < 0 || tile_y < 0)
-                                            continue;
-
                                         if (!DataGenerator.GlobalWMOLiquids.ContainsKey(adt_x))
                                             DataGenerator.GlobalWMOLiquids.Add(adt_x, new Dictionary<int, float[,]>());
                                         if (!DataGenerator.GlobalWMOLiquids[adt_x].ContainsKey(adt_y))
                                             DataGenerator.GlobalWMOLiquids[adt_x].Add(adt_y, new float[128, 128]);
 
                                         DataGenerator.GlobalWMOLiquids[adt_x][adt_y][tile_y, tile_x] = v.Z;
-                                        Debug.WriteLine($"{tile_x},{tile_y}");
-                                        Debug.WriteLine(port);
+
+                                        //Debug.WriteLine($"{tile_x},{tile_y}");
+                                        //Debug.WriteLine(port);
                                     }
 
                                     WmoLiquidVertices.Clear();
+
                                 }
-                                corner_x += Constants.UnitSize;
                             }
                         }
                     }
