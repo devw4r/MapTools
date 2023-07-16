@@ -4,7 +4,6 @@
 
 using System;
 using System.IO;
-using System.Text;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -20,7 +19,8 @@ using AlphaCoreExtractor.Core.Terrain;
 using AlphaCoreExtractor.Helpers.Enums;
 using AlphaCoreExtractor.DBC.Structures;
 using AlphaCoreExtractor.Core.Structures;
-
+using System.Text;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace AlphaCoreExtractor.Generators
 {
@@ -32,6 +32,13 @@ namespace AlphaCoreExtractor.Generators
         public static uint GeneratedMaps = 0;
         public static uint GeneratedObjs = 0;
         public static uint GeneratedNavs = 0;
+
+        public static void ResetCount()
+        {
+            GeneratedMaps = 0;
+            GeneratedObjs = 0;
+            GeneratedNavs = 0;
+        }
 
         #region NavFiles
         private static readonly int HeightsPerTileSide = Constants.CellSize * Constants.TileSize;
@@ -191,7 +198,7 @@ namespace AlphaCoreExtractor.Generators
                         //        indices.Add(offset + index);
                         //}
                     }
-                    GC.Collect();
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
                 }
 
                 // MDX living in the ADT chunk.

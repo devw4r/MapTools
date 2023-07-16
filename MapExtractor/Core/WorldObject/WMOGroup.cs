@@ -7,11 +7,11 @@ using System.Collections.Generic;
 
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
-using AlphaCoreExtractor.Core.Cache;
 using AlphaCoreExtractor.Core.Readers;
 using AlphaCoreExtractor.Core.Structures;
 using AlphaCoreExtractor.Core.WorldObject.Structures;
 using AlphaCoreExtractor.Core.WorldObject.Chunks.WMOGroups;
+using AlphaCoreExtractor.Core.Cache;
 
 namespace AlphaCoreExtractor.Core.WorldObject
 {

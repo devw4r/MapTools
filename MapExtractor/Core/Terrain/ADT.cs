@@ -8,13 +8,13 @@ using System.Collections.Generic;
 using AlphaCoreExtractor.DBC;
 using AlphaCoreExtractor.Log;
 using AlphaCoreExtractor.Helpers;
-using AlphaCoreExtractor.Generators;
 using AlphaCoreExtractor.Core.Chunks;
 using AlphaCoreExtractor.Core.Models;
 using AlphaCoreExtractor.Core.Readers;
 using AlphaCoreExtractor.DBC.Structures;
 using AlphaCoreExtractor.Core.Structures;
 using AlphaCoreExtractor.Core.WorldObject;
+using AlphaCoreExtractor.Generators;
 
 namespace AlphaCoreExtractor.Core.Terrain
 {
@@ -158,7 +158,7 @@ namespace AlphaCoreExtractor.Core.Terrain
                         WMOs.Add(wmo);
 
             // Load related MDXs.
-            if (Configuration.ShouldParseMDXs)
+            if(Configuration.ShouldParseMDXs)
                 foreach (MapDoodadDefinition modelDefinition in DoodadDefinitions.Values)
                     if (modelDefinition.Exists)
                         if (terrainReader.LoadMDX(modelDefinition, out MDX mdx))
@@ -204,7 +204,7 @@ namespace AlphaCoreExtractor.Core.Terrain
 
                 //MODF (Placement information for WMOs. Additional to this, the WMOs to render are referenced in each MCRF chunk)
                 var dataChunk = terrainterrainReader.ReadBytes(DataChunkHeader.Size);
-                if (Configuration.ShouldParseWMOs)
+                if(Configuration.ShouldParseWMOs)
                     ObjectDefinitions = MapObjectDefinition.BuildFromChunk(dataChunk, terrainterrainReader.WmoFiles);
                 return true;
             }

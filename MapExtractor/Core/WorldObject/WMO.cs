@@ -12,13 +12,12 @@ using AlphaCoreExtractor.Helpers;
 using AlphaCoreExtractor.Core.Cache;
 using AlphaCoreExtractor.Core.Models;
 using AlphaCoreExtractor.Core.Chunks;
-using AlphaCoreExtractor.Core.Terrain;
 using AlphaCoreExtractor.Core.Readers;
 using AlphaCoreExtractor.Core.Structures;
 using AlphaCoreExtractor.Core.Models.Cache;
 using AlphaCoreExtractor.Core.WorldObject.Chunks;
 using AlphaCoreExtractor.Core.WorldObject.Structures;
-using AlphaCoreExtractor.Core.WorldObject.Chunks.WMOGroups;
+
 
 namespace AlphaCoreExtractor.Core.WorldObject
 {
@@ -206,6 +205,8 @@ namespace AlphaCoreExtractor.Core.WorldObject
             if (!ReadMOGP())
                 return;
 
+            if (Groups.Any(g => g.LiquidInformation.Count() > 0))
+                Console.Write("");
             // Mesh related, internal.
             if (Configuration.ShouldParseWMOs)
                 TransformWMO(objectDefinition);
@@ -262,7 +263,6 @@ namespace AlphaCoreExtractor.Core.WorldObject
                         var curMDX = new MDX(curDoodadDef.FilePath, true);
                         if (!curMDX.HasCollision)
                         {
-                            curMDX?.Dispose();
                             if (Globals.Verbose)
                                 Logger.Warning($"Skipping MDX {Path.GetFileName(curDoodadDef.FilePath)} it has no default collision.");
                             continue;
@@ -295,118 +295,138 @@ namespace AlphaCoreExtractor.Core.WorldObject
             int offset;
             foreach (var wmoGroup in Groups)
             {
-                using (wmoGroup)
+                var usedTriangles = new HashSet<Index3>();
+                var uniqueWmoTriangles = new List<Index3>();
+
+                foreach (var node in wmoGroup.BSPNodes)
                 {
-                    var usedTriangles = new HashSet<Index3>();
-                    var uniqueWmoTriangles = new List<Index3>();
-
-                    foreach (var node in wmoGroup.BSPNodes)
+                    foreach (var triangle in node.TriangleIndices)
                     {
-                        foreach (var triangle in node.TriangleIndices)
+                        if (!usedTriangles.Contains(triangle))
                         {
-                            if (!usedTriangles.Contains(triangle))
-                            {
-                                usedTriangles.Add(triangle);
-                                uniqueWmoTriangles.Add(triangle);
-                            }
-                        }
-                    }
-
-                    var newIndices = new Dictionary<int, int>();
-                    foreach (var triangle in uniqueWmoTriangles)
-                    {
-                        // Add all vertices, uniquely.
-                        if (!newIndices.TryGetValue(triangle.Index0, out int newIndex))
-                        {
-                            newIndex = WmoVertices.Count;
-                            newIndices.Add(triangle.Index0, newIndex);
-
-                            var basePosVec = wmoGroup.Vertices[triangle.Index0];
-                            var rotatedPosVec = Vector3.Transform(basePosVec, rotateZ);
-                            var finalPosVec = rotatedPosVec + originVec;
-                            WmoVertices.Add(finalPosVec);
-                        }
-                        WmoIndices.Add(newIndex);
-
-                        if (!newIndices.TryGetValue(triangle.Index1, out newIndex))
-                        {
-                            newIndex = WmoVertices.Count;
-                            newIndices.Add(triangle.Index1, newIndex);
-
-                            var basePosVec = wmoGroup.Vertices[triangle.Index1];
-                            var rotatedPosVec = Vector3.Transform(basePosVec, rotateZ);
-                            var finalPosVec = rotatedPosVec + originVec;
-                            WmoVertices.Add(finalPosVec);
-                        }
-                        WmoIndices.Add(newIndex);
-
-                        if (!newIndices.TryGetValue(triangle.Index2, out newIndex))
-                        {
-                            newIndex = WmoVertices.Count;
-                            newIndices.Add(triangle.Index2, newIndex);
-
-                            var basePosVec = wmoGroup.Vertices[triangle.Index2];
-                            var rotatedPosVec = Vector3.Transform(basePosVec, rotateZ);
-                            var finalPosVec = rotatedPosVec + originVec;
-                            WmoVertices.Add(finalPosVec);
-                        }
-                        WmoIndices.Add(newIndex);
-
-                        // Liquids
-                        //if (wmoGroup.LiquidInformation.Count > 0)
-                        //{
-                        //    var liqInfo = wmoGroup.LiquidInformation[0];
-                        //    var liqBasePos = liqInfo.BaseCoordinates;
-
-                        //    offset = this.WmoLiquidVertices.Count;
-                        //    for (var y = 0; y < liqInfo.YVertexCount; y++)
-                        //    {
-                        //        for (var x = 0; x < liqInfo.XVertexCount; x++)
-                        //        {
-                        //            var v1 = StorageRoom.PopVector3((x + 0) * Constants.UnitSize + liqBasePos.X, (y + 0) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
-                        //            var v2 = StorageRoom.PopVector3((x + 1) * Constants.UnitSize + liqBasePos.X, (y + 0) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
-                        //            var v3 = StorageRoom.PopVector3((x + 0) * Constants.UnitSize + liqBasePos.X, (y + 1) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
-                        //            var v4 = StorageRoom.PopVector3((x + 1) * Constants.UnitSize + liqBasePos.X, (y + 1) * Constants.UnitSize + liqBasePos.Y, liqBasePos.Z);
-
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v1, rotateZ) + originVec);
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v2, rotateZ) + originVec);
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v3, rotateZ) + originVec);
-                        //            WmoLiquidVertices.Add(Vector3.Transform(v4, rotateZ) + originVec);
-
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 4);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 3);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 2);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 2);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 3);
-                        //            WmoLiquidIndices.Add(WmoLiquidVertices.Count - 1);
-                        //        }
-                        //    }
-                        //}
-                    }
-
-                    // Rotate the MDX's to the new orientation
-                    if (WMOMDXs != null)
-                    {
-                        foreach (var currentMDX in WMOMDXs)
-                        {
-                            offset = WmoMDXVertices.Count;
-                            for (var i = 0; i < currentMDX.Vertices.Count; i++)
-                            {
-                                var basePosition = currentMDX.Vertices[i];
-                                var rotatedPosition = Vector3.Transform(basePosition, rotateZ);
-                                var finalPosition = rotatedPosition + originVec;
-
-                                WmoMDXVertices.Add(finalPosition);
-                            }
-
-                            foreach (var index in currentMDX.Indices)
-                                WmoMDXIndices.Add(index + offset);
+                            usedTriangles.Add(triangle);
+                            uniqueWmoTriangles.Add(triangle);
                         }
                     }
                 }
 
-                GC.Collect();
+                var newIndices = new Dictionary<int, int>();
+                foreach (var triangle in uniqueWmoTriangles)
+                {
+                    // Add all vertices, uniquely.
+                    if (!newIndices.TryGetValue(triangle.Index0, out int newIndex))
+                    {
+                        newIndex = WmoVertices.Count;
+                        newIndices.Add(triangle.Index0, newIndex);
+
+                        var basePosVec = wmoGroup.Vertices[triangle.Index0];
+                        var rotatedPosVec = Vector3.Transform(basePosVec, rotateZ);
+                        var finalPosVec = rotatedPosVec + originVec;
+                        WmoVertices.Add(finalPosVec);
+                    }
+                    WmoIndices.Add(newIndex);
+
+                    if (!newIndices.TryGetValue(triangle.Index1, out newIndex))
+                    {
+                        newIndex = WmoVertices.Count;
+                        newIndices.Add(triangle.Index1, newIndex);
+
+                        var basePosVec = wmoGroup.Vertices[triangle.Index1];
+                        var rotatedPosVec = Vector3.Transform(basePosVec, rotateZ);
+                        var finalPosVec = rotatedPosVec + originVec;
+                        WmoVertices.Add(finalPosVec);
+                    }
+                    WmoIndices.Add(newIndex);
+
+                    if (!newIndices.TryGetValue(triangle.Index2, out newIndex))
+                    {
+                        newIndex = WmoVertices.Count;
+                        newIndices.Add(triangle.Index2, newIndex);
+
+                        var basePosVec = wmoGroup.Vertices[triangle.Index2];
+                        var rotatedPosVec = Vector3.Transform(basePosVec, rotateZ);
+                        var finalPosVec = rotatedPosVec + originVec;
+                        WmoVertices.Add(finalPosVec);
+                    }
+                    WmoIndices.Add(newIndex);
+
+                    // Liquids
+                    //if (wmoGroup.LiquidInformation.Count > 0)
+                    //{
+                    //    var liqInfo = wmoGroup.LiquidInformation[0];
+                    //    var liqOrigin = liqInfo.BaseCoordinates;
+
+                    //    offset = this.WmoLiquidVertices.Count;
+                    //    for (var xStep = 0; xStep < liqInfo.XVertexCount; xStep++)
+                    //    {
+                    //        for (var yStep = 0; yStep < liqInfo.YVertexCount; yStep++)
+                    //        {
+                    //            var xPos = liqOrigin.X + xStep * Constants.UnitSize;
+                    //            var yPos = liqOrigin.Y + yStep * Constants.UnitSize;
+                    //            var zPosTop = liqInfo.HeightMapMax[xStep, yStep];
+
+                    //            var liqVecTop = new Vector3(xPos, yPos, zPosTop);
+
+                    //            var rotatedTop = Vector3.Transform(liqVecTop, rotateZ);
+                    //            var vecTop = rotatedTop + originVec;
+
+                    //            WmoLiquidVertices.Add(vecTop);
+                    //        }
+                    //    }
+
+                    //    for (var row = 0; row < liqInfo.XTileCount; row++)
+                    //    {
+                    //        for (var col = 0; col < liqInfo.YTileCount; col++)
+                    //        {
+                    //            if ((liqInfo.LiquidTileFlags[row, col] & 0x0F) == 0x0F) continue;
+
+                    //            var index = ((row + 1) * (liqInfo.YVertexCount) + col);
+                    //            WmoLiquidIndices.Add(offset + index);
+
+                    //            index = (row * (liqInfo.YVertexCount) + col);
+                    //            WmoLiquidIndices.Add(offset + index);
+
+                    //            index = (row * (liqInfo.YVertexCount) + col + 1);
+                    //            WmoLiquidIndices.Add(offset + index);
+
+                    //            index = ((row + 1) * (liqInfo.YVertexCount) + col + 1);
+                    //            WmoLiquidIndices.Add(offset + index);
+
+                    //            index = ((row + 1) * (liqInfo.YVertexCount) + col);
+                    //            WmoLiquidIndices.Add(offset + index);
+
+                    //            index = (row * (liqInfo.YVertexCount) + col + 1);
+                    //            WmoLiquidIndices.Add(offset + index);
+                    //        }
+                    //    }
+                    //}
+                }
+
+                // Rotate the MDX's to the new orientation
+                if (WMOMDXs != null)
+                {
+                    foreach (var currentMDX in WMOMDXs)
+                    {
+                        offset = WmoMDXVertices.Count;
+                        for (var i = 0; i < currentMDX.Vertices.Count; i++)
+                        {
+                            var basePosition = currentMDX.Vertices[i];
+                            var rotatedPosition = Vector3.Transform(basePosition, rotateZ);
+                            var finalPosition = rotatedPosition + originVec;
+
+                            WmoMDXVertices.Add(finalPosition);
+                        }
+
+                        foreach (var index in currentMDX.Indices)
+                            WmoMDXIndices.Add(index + offset);
+                    }
+                }
             }
+
+            // We already transformed vertices, push them to storage.
+            foreach (var group in Groups)
+                group?.Dispose();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
         }
 
         /// <summary>

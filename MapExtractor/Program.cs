@@ -28,10 +28,8 @@ namespace AlphaCoreExtractor
         static void Main(string[] args)
         {
             IsRunning = true;
-            MapsThread = new Thread(new ThreadStart(StartProcess))
-            {
-                Name = "MapsThread"
-            };
+            MapsThread = new Thread(new ThreadStart(StartProcess));
+            MapsThread.Name = "MapsThread";
             MapsThread.Start();
 
             while (IsRunning)
@@ -107,7 +105,8 @@ namespace AlphaCoreExtractor
                 }
 
                 // Extract available WDT Terrains and match them to a DBC map.
-                if (!MPQExtractor.ExtractWDTFiles(out Dictionary<DBCMap, string> WDTFiles))
+                Dictionary<DBCMap, string> WDTFiles;
+                if (!MPQExtractor.ExtractWDTFiles(out WDTFiles))
                 {
                     Logger.Error("Unable to extract WDT files, exiting...");
                     Console.ReadLine();
