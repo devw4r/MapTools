@@ -29,8 +29,6 @@ namespace AlphaCoreExtractor.Generators
         [DllImport("/recast/AlphaCoreRecast.dll", EntryPoint = "ExtractNav", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern bool ExtractNav(string filePath, string outputNav);
 
-        public static HashSet<string> Ports = new HashSet<string>();
-        public static Dictionary<int, Dictionary<int, float[,]>> GlobalWMOLiquids = new Dictionary<int, Dictionary<int, float[,]>>();
         public static uint GeneratedMaps = 0;
         public static uint GeneratedObjs = 0;
         public static uint GeneratedNavs = 0;
@@ -322,41 +320,6 @@ namespace AlphaCoreExtractor.Generators
             }
         }
 
-        public static void WriteWMOLiquids(uint mapID)
-        {
-            foreach(var adtX in GlobalWMOLiquids.Keys)
-            {
-                foreach(var adtY in GlobalWMOLiquids[adtX].Keys)
-                {
-                    var outFileName = $@"{Paths.OutputMapsPath}{mapID:000}{adtX:00}{adtY:00}.map";
-                    if(File.Exists(outFileName))
-                    {
-                        using (FileStream fileStream = new FileStream(outFileName, FileMode.Append))
-                        {
-                            using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
-                            {
-                                var liquidHeightMap = GlobalWMOLiquids[adtX][adtY];
-
-                                for (int y = 0; y < Constants.GridSize; y++)
-                                {
-                                    for (int x = 0; x < Constants.GridSize; x++)
-                                    {
-                                        if (liquidHeightMap[y, x] != 0)
-                                        {
-                                            binaryWriter.Write((sbyte)SMChunkFlags.FLAG_LQ_RIVER);
-                                            binaryWriter.Write(liquidHeightMap[y, x]);
-                                        }
-                                        else
-                                            binaryWriter.Write((sbyte)-1);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         #region MapFiles
         private static void GenerateMapFiles(WDT wdt, ADT adt)
         {
@@ -376,7 +339,7 @@ namespace AlphaCoreExtractor.Generators
                 {
                     WriteHeightMap(binaryWriter, adt);
                     WriteAreaInformation(binaryWriter, adt, wdt);
-                    WriteTerrainLiquids(binaryWriter, adt);
+                    WriteLiquids(binaryWriter, adt);
                 }
             }
         }
@@ -385,7 +348,7 @@ namespace AlphaCoreExtractor.Generators
         private static readonly float[,] LiquidHeight = new float[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
         private static readonly sbyte[,] LiquidFlag = new sbyte[(int)Constants.GridSize + 1, (int)Constants.GridSize + 1];
         private static readonly bool[,] emptyHolesArray = new bool[4, 4];
-        private static void WriteTerrainLiquids(BinaryWriter binaryWriter, ADT adt)
+        private static void WriteLiquids(BinaryWriter binaryWriter, ADT adt)
         {
             Array.Clear(LiquidShow, 0, LiquidShow.Length);
             Array.Clear(LiquidHeight, 0, LiquidHeight.Length);
@@ -477,10 +440,10 @@ namespace AlphaCoreExtractor.Generators
 
         private static void WriteHeightMap(BinaryWriter binaryWriter, ADT tileArea)
         {
-            var terrainHeightMap = tileArea.TerrainHeightMap;
+            var liquidHeightfield = tileArea.LiquidsHeightmap;
             for (int cy = 0; cy < Configuration.ZResolution; cy++)
                 for (int cx = 0; cx < Configuration.ZResolution; cx++)
-                    binaryWriter.Write(terrainHeightMap.CalculateZ(cy, cx));
+                    binaryWriter.Write(liquidHeightfield.CalculateZ(cy, cx));
         }
         #endregion
     }
